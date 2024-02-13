@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-ENTRYPOINT [ "backend/python3", "server.py" ]
+ENTRYPOINT [ "python3", "server.py" ]
