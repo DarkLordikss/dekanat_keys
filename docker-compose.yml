@@ -9,6 +9,6 @@ services:
       - env/backend.env
     restart: always
     ports:
-      - 9111:8000
+      - 8118:8000
     networks:
       - default
