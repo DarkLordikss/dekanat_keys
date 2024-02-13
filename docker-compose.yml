@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    hostname: backend
+    env_file:
+      - env/backend.env
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 9111:8000
+    networks:
+      - default

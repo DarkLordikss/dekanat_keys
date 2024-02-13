@@ -1,0 +1,13 @@
+FROM python:3.10-slim
+LABEL maintainer="Evchatov Ivan"
+
+WORKDIR /app
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+COPY . ./backend
+
+WORKDIR /app
+
+ENTRYPOINT [ "backend/python3", "server.py" ]
