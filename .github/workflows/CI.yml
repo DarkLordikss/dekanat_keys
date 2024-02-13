@@ -20,5 +20,4 @@ jobs:
             cd /root/dekanat_keys 
             git fetch --all
             git reset --hard origin/backend
-            cd ..
             docker-compose up --build -d docker-compose up -d --build --force-recreate
