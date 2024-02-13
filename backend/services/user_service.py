@@ -2,8 +2,8 @@ import logging
 
 from sqlalchemy.orm import Session
 
-from backend.models.tables.user import User
-from backend.models.tables.role import Role
+from models.tables.user import User
+from models.tables.role import Role
 
 
 class UserService:

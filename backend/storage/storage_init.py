@@ -1,15 +1,15 @@
 import logging
 
-from backend.storage.db_config import SessionLocal, Base, engine
+from storage.db_config import SessionLocal, Base, engine
 
-from backend.models.tables.user import User
-from backend.models.tables.classroom import Classroom
-from backend.models.tables.confirm_status import ConfirmStatus
-from backend.models.tables.role import Role
-from backend.models.tables.schedule_element import ScheduleElement
-from backend.models.tables.timeslot import Timeslot
-from backend.models.tables.application import Application
-from backend.models.tables.crl import CRL
+from models.tables.user import User
+from models.tables.classroom import Classroom
+from models.tables.confirm_status import ConfirmStatus
+from models.tables.role import Role
+from models.tables.schedule_element import ScheduleElement
+from models.tables.timeslot import Timeslot
+from models.tables.application import Application
+from models.tables.crl import CRL
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -5,10 +5,11 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers.test_router import test_router
+from routers.test_router import test_router
+from routers.user_router import user_router
+
 from storage.storage_init import init_db
 
-from routers.user_router import user_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -6,8 +6,6 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-COPY . ./backend
-
-WORKDIR /app
+COPY . .
 
 ENTRYPOINT [ "backend/python3", "server.py" ]
