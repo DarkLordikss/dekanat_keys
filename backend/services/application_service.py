@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from sqlalchemy.orm import Session
-
+from sqlalchemy import or_
 from models.dto.application_dto import ApplicationDTO
 from models.enum.application_statuses import Application_statuses
 from models.enum.user_roles import User_roles
@@ -10,6 +10,8 @@ from models.tables.application import Application
 from models.tables.user import User
 
 from datetime import datetime, timedelta, date, UTC
+
+
 
 
 from models.tables.timeslot import Timeslot
@@ -74,23 +76,23 @@ class ApplicationService:
                 .query(Application, User) \
                 .join(User, Application.user_id == User.id) \
                 .filter(
-                        (Application.classroom_id == classroom_id
-                        and Application.class_date == class_date
-                        and Application.time_table_id == time_table_id
-                        and (User.role_id == User_roles.Teacher.value or User.id == user_id))
-                    ) \
-                .first()
+                Application.classroom_id == classroom_id,
+                Application.class_date == class_date,
+                Application.time_table_id == time_table_id,
+                or_(User.role_id == User_roles.Teacher.value, User.id == user_id)
+            ) \
+                .all()
 
-            if teacher_at_that_time:
-                if (teacher_at_that_time.id == user_id):
+            for application, user in teacher_at_that_time:
+                if application.user_id == user_id:
                     self.logger.warning(f"вы уже заняли эту аудиторию")
                     return 0
-                else:
-                    self.logger.warning(f"Преподаватель уже занял эту аудиторию")
+                elif application.user_id != user_id:
+                    self.logger.warning(f"Преподаватель не занимал эту аудиторию")
                     return 1
-            else:
-                self.logger.info(f"Преподаватель не занимал эту аудиторию")
-                return 2
+
+            self.logger.info(f"Преподаватель не занимал эту аудиторию")
+            return 2
 
             
         except Exception as e:
@@ -111,18 +113,19 @@ class ApplicationService:
                 .query(Application, User) \
                 .join(User, Application.user_id == User.id) \
                 .filter(
-                        Application.classroom_id == classroom_id
-                        and Application.class_date == class_date
-                        and Application.time_table_id == time_table_id
-                        and (User.role_id == User_roles.Student.value or User.id == user_id)
+                        Application.classroom_id == classroom_id,
+                        Application.class_date == class_date,
+                        Application.time_table_id == time_table_id,
+                        or_(User.role_id == User_roles.Student.value, User.id == user_id)
                     ) \
                 .all()
-            
-            for application in student_at_that_time:
-                if student_at_that_time.id == user_id:
+            self.logger.warning(f"GGGGGGGGGGGGGGGGGGGGGG {User_roles.Student.value}")
+            for application, user in student_at_that_time:
+                if application.user_id == user_id:
                     self.logger.warning(f"вы уже заняли эту аудиторию")
                     return True
-                application.application_status_id = Application_statuses.Rejected
+                self.logger.warning(f"GGGGGGGGGGGGGGGGGGGGGG {application.user_id}")
+                application.application_status_id = Application_statuses.Rejected.value
 
             db.commit()
             return False
