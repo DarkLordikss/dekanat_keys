@@ -5,6 +5,7 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
+from routers.classroom_router import classroom_router
 from routers.test_router import test_router
 from routers.user_router import user_router
 
@@ -18,6 +19,7 @@ router = APIRouter(prefix="/api/v1")
 
 router.include_router(user_router)
 router.include_router(test_router)
+router.include_router(classroom_router)
 
 app = FastAPI()
 app.include_router(router)
