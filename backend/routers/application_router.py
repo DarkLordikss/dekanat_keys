@@ -60,24 +60,30 @@ async def create_application(
             raise HTTPException(status_code=404, detail="time not found")
 
         role = user.role_id
-        if role == User_roles.Student:
+        if role == User_roles.Student.value:
             if application_DTO.dublicates > 1:
                 raise HTTPException(status_code=400, detail="you can't do a lot of gublicates")
 
-            if await application_service.check_priority(
+            result = await application_service.check_priority(
                 db,
                 application_DTO.classroom_id,
                 application_DTO.class_date,
-                application_DTO.time_table_id
-            ):
+                application_DTO.time_table_id,
+                user.id)
+
+            if result == 0:
+                raise HTTPException(status_code=403, detail="you has already occupied this classroom")
+            elif result == 1:
                 raise HTTPException(status_code=403, detail="teacher has already occupied this classroom")
         else:
-            await application_service.delete_all_students(
+            if (await application_service.delete_all_students(
                 db,
                 application_DTO.classroom_id,
                 application_DTO.class_date,
-                application_DTO.time_table_id
-            )
+                application_DTO.time_table_id,
+                user.id
+            )) == True:
+                raise HTTPException(status_code=403, detail="you has already occupied this classroom")
 
         for i in range (application_DTO.dublicates):
             application_DTO.class_date += (timedelta(days=config.ONE_WEEK)*(i))

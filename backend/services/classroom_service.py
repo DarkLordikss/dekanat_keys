@@ -41,3 +41,4 @@ class ClassroomService:
         except Exception as e:
             self.logger.error(f"(Check classroom existence) Error: {e}")
             raise
+

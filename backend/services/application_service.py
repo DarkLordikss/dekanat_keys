@@ -29,7 +29,7 @@ class ApplicationService:
             new_application = Application (
                 user_id = user_id,
                 classroom_id = application_dto.classroom_id,
-                application_status_id = Application_statuses.Not_processed,
+                application_status_id = Application_statuses.Not_processed.value,
                 application_date = datetime.now(UTC) + timedelta(hours=7),
                 name = application_dto.name,
                 description = application_dto.description,
@@ -37,12 +37,11 @@ class ApplicationService:
                 time_table_id = application_dto.time_table_id
             )
 
-            application_entry = Application(new_application)
-            db.add(application_entry)
+            db.add(new_application)
             db.commit()
 
         except Exception as e:
-            self.logger.error(f"(Check classroom existence) Error: {e}")
+            self.logger.error(f"(async def create_application) Error: {e}")
             raise
 
 
@@ -51,14 +50,14 @@ class ApplicationService:
             classroom = db.query(Timeslot).filter(Timeslot.id == time_table_id).first()
 
             if classroom:
-                self.logger.info(f"(Check time existence) time with id {time_table_id} exists")
-                return True
-            else:
-                self.logger.warning(f"(Check time existence) time with id {time_table_id} not found")
+                self.logger.info(f"(time_table_id_validate) time with id {time_table_id} exists")
                 return False
+            else:
+                self.logger.warning(f"(time_table_id_validate) time with id {time_table_id} not found")
+                return True
             
         except Exception as e:
-            self.logger.error(f"(Check classroom existence) Error: {e}")
+            self.logger.error(f"(time_table_id_validate) Error: {e}")
             raise
 
 
@@ -67,30 +66,35 @@ class ApplicationService:
             db: Session,
             classroom_id: uuid,
             class_date: date, 
-            time_table_id: int
-            ) -> bool:
+            time_table_id: int,
+            user_id: uuid
+            ) -> int:
         try:
             teacher_at_that_time = db \
                 .query(Application, User) \
                 .join(User, Application.user_id == User.id) \
                 .filter(
-                        Application.classroom_id == classroom_id
+                        (Application.classroom_id == classroom_id
                         and Application.class_date == class_date
                         and Application.time_table_id == time_table_id
-                        and User.role_id == User_roles.Teacher
+                        and (User.role_id == User_roles.Teacher.value or User.id == user_id))
                     ) \
                 .first()
 
             if teacher_at_that_time:
-                self.logger.warning(f"Преподаватель уже занял эту аудиторию")
-                return True
+                if (teacher_at_that_time.id == user_id):
+                    self.logger.warning(f"вы уже заняли эту аудиторию")
+                    return 0
+                else:
+                    self.logger.warning(f"Преподаватель уже занял эту аудиторию")
+                    return 1
             else:
                 self.logger.info(f"Преподаватель не занимал эту аудиторию")
-                return False
+                return 2
 
             
         except Exception as e:
-            self.logger.error(f"(Check classroom existence) Error: {e}")
+            self.logger.error(f"(check_priority) Error: {e}")
             raise
 
 
@@ -99,8 +103,9 @@ class ApplicationService:
             db: Session,
             classroom_id: uuid,
             class_date: date, 
-            time_table_id: int
-            ) -> None:
+            time_table_id: int,
+            user_id: uuid
+            ) -> bool:
         try:
             student_at_that_time = db \
                 .query(Application, User) \
@@ -109,15 +114,19 @@ class ApplicationService:
                         Application.classroom_id == classroom_id
                         and Application.class_date == class_date
                         and Application.time_table_id == time_table_id
-                        and User.role_id == User_roles.Student
+                        and (User.role_id == User_roles.Student.value or User.id == user_id)
                     ) \
                 .all()
             
             for application in student_at_that_time:
+                if student_at_that_time.id == user_id:
+                    self.logger.warning(f"вы уже заняли эту аудиторию")
+                    return True
                 application.application_status_id = Application_statuses.Rejected
 
             db.commit()
+            return False
 
         except Exception as e:
-            self.logger.error(f"(Check classroom existence) Error: {e}")
+            self.logger.error(f"(delete_all_students) Error: {e}")
             raise
