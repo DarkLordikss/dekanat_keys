@@ -5,7 +5,7 @@ from datetime import date, timedelta
 import config
 
 
-class ApplicationDTO(BaseModel):
+class ApplicationCreateDTO(BaseModel):
     classroom_id: UUID
     name: constr(min_length=config.MIN_LENGTH_RECORDINGS)
     description: str
