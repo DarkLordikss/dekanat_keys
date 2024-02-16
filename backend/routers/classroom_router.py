@@ -22,7 +22,6 @@ classroom_router = APIRouter(prefix="/classroom")
     responses={
         200: {
             "model": ClassroomsDTO
-
         },
         500: {
             "model": ErrorDTO

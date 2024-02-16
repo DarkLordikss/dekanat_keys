@@ -6,7 +6,6 @@ from models.tables.user import User
 from models.tables.classroom import Classroom
 from models.tables.confirm_status import ConfirmStatus
 from models.tables.role import Role
-from models.tables.schedule_element import ScheduleElement
 from models.tables.timeslot import Timeslot
 from models.tables.application import Application
 from models.tables.crl import CRL
@@ -24,7 +23,6 @@ def init_db():
                                                       Classroom.__table__,
                                                       ConfirmStatus.__table__,
                                                       Role.__table__,
-                                                      ScheduleElement.__table__,
                                                       Timeslot.__table__,
                                                       CRL.__table__,
                                                       ]
