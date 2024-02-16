@@ -3,10 +3,6 @@ import uuid
 
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from typing import Dict, List, Union, Optional
-from collections import defaultdict
-from uuid import UUID
-
 
 from models.dto.application_create_dto import ApplicationCreateDTO
 from models.dto.application_showing_dto import ApplicationShowingDTO
@@ -89,13 +85,13 @@ class ApplicationService:
 
             for application, user in teacher_at_that_time:
                 if application.user_id == user_id:
-                    self.logger.warning(f"вы уже заняли эту аудиторию")
+                    self.logger.warning(f"(Check_priority) Пользователь ({user_id}) уже заняли эту аудиторию")
                     return 0
                 elif application.user_id != user_id:
-                    self.logger.warning(f"Преподаватель не занимал эту аудиторию")
+                    self.logger.warning(f"(Check_priority) Преподаватель не занимал эту аудиторию")
                     return 1
 
-            self.logger.info(f"Преподаватель не занимал эту аудиторию")
+            self.logger.info(f"(Check_priority) Преподаватель не занимал эту аудиторию")
             return 2
 
         except Exception as e:
@@ -124,7 +120,7 @@ class ApplicationService:
 
             for application, user in student_at_that_time:
                 if application.user_id == user_id:
-                    self.logger.warning(f"Вы уже заняли эту аудиторию")
+                    self.logger.warning(f"(Delete all students) Пользователь ({user_id}) уже заняли эту аудиторию")
                     return True
 
                 application.application_status_id = Application_statuses.Rejected.value
@@ -133,12 +129,11 @@ class ApplicationService:
             return False
 
         except Exception as e:
-            self.logger.error(f"(delete_all_students) Error: {e}")
+            self.logger.error(f"(Delete all students) Error: {e}")
             raise
 
-
-    async  def show_applications(
-            self,
+    @staticmethod
+    async def show_applications(
             db: Session,
             application_showing_dto: ApplicationShowingDTO
     ):
@@ -150,15 +145,6 @@ class ApplicationService:
                 Application.application_status_id == Application_statuses.Key_received.value
             )) \
             .subquery()
-
-        test = db.query(Application).filter(Application.class_date == application_showing_dto.date)
-        result = db.query(test.exists()).scalar()
-
-        # Проверяем результат
-        if result:
-            self.logger.info(f"Подзапрос нашел что-то.{application_showing_dto.date}")
-        else:
-            self.logger.info(f"Подзапрос ничего не нашел.{application_showing_dto.date}")
 
         query = db \
             .query(Classroom, subquery_scheduled) \
@@ -174,14 +160,9 @@ class ApplicationService:
             query = query.filter(subquery_scheduled.c.user_id == application_showing_dto.user_id)
 
         result_applications = query.all()
-        formatted_timetable : FormattedTimetable = {}
+        formatted_timetable = {}
 
         for classroom in result_applications:
-            class_number = classroom.time_table_id
-            self.logger.info(f"ЗАПРОС ВЕРЕН МНЕ classroom: {classroom}")
-            self.logger.info(f"ЗАПРОС ВЕРЕН МНЕ classroom.building: {classroom[0].building}")
-            self.logger.info(f"ЗАПРОС ВЕРЕН МНЕ classroom.number: {classroom[0].number}")
-            ##self.logger.info(f"ЗАПРОС {subquery_scheduled.name.scalar()}")
             pair = Pair(
                 classroom_id=classroom.id,
                 name=classroom.name,
@@ -189,7 +170,6 @@ class ApplicationService:
                 buildings=classroom[0].building,
                 class_number=classroom[0].number
             )
-            self.logger.info(f"Я РУССКИЙ")
             class_number = classroom.time_table_id
 
             if class_number in formatted_timetable:
@@ -199,10 +179,11 @@ class ApplicationService:
 
         return formatted_timetable
 
-
-
-
+    @staticmethod
     def fill_timetable_data(result_applications, formatted_timetable: FormattedTimetable):
+        class_number = 0
+        pair = Pair()
+
         for classroom, subquery_scheduled in result_applications:
             pair = Pair(**{
                 "classroom_id": classroom.id,

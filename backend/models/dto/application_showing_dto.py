@@ -1,16 +1,15 @@
-from pydantic import BaseModel, constr, field_validator
+from pydantic import BaseModel, field_validator
 from uuid import UUID
-from datetime import date, timedelta
-from typing import List, Optional
+from datetime import date
 
-import config
+from typing import List, Optional
 
 
 class ApplicationShowingDTO(BaseModel):
     building: int
     classrooms: List[int]
-    scheduled : bool
-    user_id : Optional[UUID] = None
+    scheduled: bool
+    user_id: Optional[UUID] = None
     date: date
 
     @field_validator('date')
