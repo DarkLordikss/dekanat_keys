@@ -17,18 +17,12 @@ class EntityVerifierService:
     async def check_existence(self, db: Session, model: Type[Base], filter_condition: any, log_info: str,
                               log_warning: str, **kwargs) -> bool:
         try:
-            self.logger.warning(f"СУПЕР ГУТ 1")
             item = db.query(model).filter(filter_condition).first()
-            self.logger.warning(f"СУПЕР ГУТ 2")
 
             if item:
-                self.logger.warning(f"СУПЕР ГУТ 3")
                 self.logger.info(log_info)
-                self.logger.info(log_info.format(**kwargs))
                 return False
             else:
-                self.logger.warning(f"СУПЕР ГУТ 4")
-                self.logger.warning(log_warning.format(**kwargs))
                 self.logger.warning(log_warning)
                 return True
 
