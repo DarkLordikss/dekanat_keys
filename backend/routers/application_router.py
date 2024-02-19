@@ -13,12 +13,15 @@ from models.dto.error_dto import ErrorDTO
 from models.dto.formatted_application_dto import FormattedTimetable, Day
 from models.dto.message_dto import MessageDTO
 from models.enum.user_roles import User_roles
+from models.tables.classroom import Classroom
+from models.tables.user import User
 from storage.db_config import get_db
 
 from services.classroom_service import ClassroomService
 from services.user_service import UserService
 from services.auth_service import AuthService
 from services.application_service import ApplicationService
+from services.entity_verifier_service import EntityVerifierService
 
 import config
 
@@ -56,7 +59,7 @@ async def create_application(
         user_service: UserService = Depends(UserService),
         application_service: ApplicationService = Depends(ApplicationService),
         auth_service: AuthService = Depends(AuthService),
-        classroom_service: ClassroomService = Depends(ClassroomService)
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService)
 ):
     try:
         if await auth_service.check_revoked(db, access_token):
@@ -66,8 +69,19 @@ async def create_application(
         token_data = auth_service.get_data_from_access_token(access_token)
         user = await user_service.get_user_by_id(db, (await token_data)["sub"])
 
+        """""
         if await classroom_service.check_correct_classroom(db, str(application_create_dto.classroom_id)):
             raise HTTPException(status_code=404, detail="Classroom not found")
+        """""
+        if await entity_verifier_service.check_existence(
+            db,
+            Classroom,
+            Classroom.id == application_create_dto.classroom_id,
+            f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} exists",
+            f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} not found",
+            classroom_id=application_create_dto.classroom_id
+        ):
+            raise HTTPException(status_code=404, detail="building not found")
 
         if await application_service.time_table_id_validate(db, application_create_dto.time_table_id):
             raise HTTPException(status_code=404, detail="Time not found")
@@ -144,6 +158,8 @@ async def show_applications(
         user_id: UUID = None,
         db: Session = Depends(get_db),
         application_service: ApplicationService = Depends(ApplicationService),
+        classroom_service: ClassroomService = Depends(ClassroomService),
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
 ):
     try:
         if not end_date:
@@ -152,6 +168,32 @@ async def show_applications(
         timetables = []
         schedule = []
         current_date = start_date
+
+        if await entity_verifier_service.check_correct_dates(start_date, end_date):
+            raise HTTPException(status_code=400, detail="invalid date")
+
+        if await entity_verifier_service.check_existence(
+            db,
+            Classroom,
+            Classroom.building == building,
+            f"(Check building existence) building with number {building} exists",
+            f"(Check building existence) building with number {building} not found",
+            building_number=building
+        ):
+            raise HTTPException(status_code=404, detail="building not found")
+
+        if await classroom_service.check_correct_classrooms(db, classrooms, building):
+            raise HTTPException(status_code=404, detail="Classrooms not found")
+
+        if await entity_verifier_service.check_existence(
+                db,
+                User,
+                User.id == user_id,
+                f"(Check user existence) building with id {user_id} exists",
+                f"(Check user existence) building with id {user_id} not found",
+                user_id_func=user_id
+        ) and user_id is not None:
+            raise HTTPException(status_code=404, detail="user not found")
 
         while current_date <= end_date:
             application_showing_dto = ApplicationShowingDTO(
@@ -177,6 +219,8 @@ async def show_applications(
 
         return FormattedTimetable(schedule=schedule)
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"(Application) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")

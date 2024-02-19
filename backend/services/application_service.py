@@ -176,12 +176,11 @@ class ApplicationService:
                 buildings=classroom[0].building,
                 class_number=classroom[0].number
             )
-            class_number = classroom.time_table_id
+            pair_number = classroom.time_table_id
 
-            if class_number in formatted_timetable:
-                formatted_timetable[class_number].append(pair)
+            if pair_number in formatted_timetable:
+                formatted_timetable[pair_number].append(pair)
             else:
-                formatted_timetable[class_number] = [pair]
+                formatted_timetable[pair_number] = [pair]
 
         return formatted_timetable
-
