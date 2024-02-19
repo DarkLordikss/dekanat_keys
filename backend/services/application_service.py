@@ -160,6 +160,12 @@ class ApplicationService:
             query = query.filter(subquery_scheduled.c.user_id == application_showing_dto.user_id)
 
         result_applications = query.all()
+        formatted_timetable = ApplicationService.fill_timetable_data(result_applications)
+
+        return formatted_timetable
+
+    @staticmethod
+    def fill_timetable_data(result_applications):
         formatted_timetable = {}
 
         for classroom in result_applications:
@@ -179,22 +185,3 @@ class ApplicationService:
 
         return formatted_timetable
 
-    @staticmethod
-    def fill_timetable_data(result_applications, formatted_timetable: FormattedTimetable):
-        class_number = 0
-        pair = Pair()
-
-        for classroom, subquery_scheduled in result_applications:
-            pair = Pair(**{
-                "classroom_id": classroom.id,
-                "name": subquery_scheduled.c.name,
-                "description": subquery_scheduled.c.description,
-                "buildings": classroom.building,
-                "class_number": classroom.number
-            })
-            class_number = subquery_scheduled.c.time_table_id
-
-        if class_number in formatted_timetable.timetable:
-            formatted_timetable.timetable[class_number].append(pair)
-        else:
-            formatted_timetable.timetable[class_number] = [pair]
