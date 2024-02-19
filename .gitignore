@@ -2,3 +2,19 @@
 .idea/
 
 *.pyc
+
+/mobile/*.iml
+/mobile/.gradle
+/mobile/local.properties
+/mobile/.idea/caches
+/mobile/.idea/libraries
+/mobile/.idea/modules.xml
+/mobile/.idea/workspace.xml
+/mobile/.idea/navEditor.xml
+/mobile/.idea/assetWizardSettings.xml
+/mobile/.DS_Store
+/mobile/build
+/mobile/captures
+/mobile/.externalNativeBuild
+/mobile/.cxx
+/mobile/local.properties
