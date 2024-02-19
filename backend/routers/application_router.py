@@ -189,8 +189,8 @@ async def show_applications(
                 db,
                 User,
                 User.id == user_id,
-                f"(Check user existence) building with id {user_id} exists",
-                f"(Check user existence) building with id {user_id} not found",
+                f"(Check user existence) user with id {user_id} exists",
+                f"(Check user existence) user with id {user_id} not found",
                 user_id_func=user_id
         ) and user_id is not None:
             raise HTTPException(status_code=404, detail="user not found")
