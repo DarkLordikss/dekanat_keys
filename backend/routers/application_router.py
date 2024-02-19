@@ -12,7 +12,7 @@ from models.dto.application_showing_dto import ApplicationShowingDTO
 from models.dto.error_dto import ErrorDTO
 from models.dto.formatted_application_dto import FormattedTimetable, Day
 from models.dto.message_dto import MessageDTO
-from models.enum.user_roles import User_roles
+from models.enum.userroles import UserRoles
 from models.tables.classroom import Classroom
 from models.tables.user import User
 from storage.db_config import get_db
@@ -87,7 +87,7 @@ async def create_application(
             raise HTTPException(status_code=404, detail="Time not found")
 
         role = user.role_id
-        if role == User_roles.Student.value:
+        if role == UserRoles.Student.value:
             if application_create_dto.dublicates > 1:
                 raise HTTPException(status_code=400, detail="you can't do a lot of duplicates")
 
@@ -224,3 +224,66 @@ async def show_applications(
     except Exception as e:
         logger.error(f"(Application) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@application_router.post(
+    "/change_deal_status/{application_id}",
+    response_model=MessageDTO,
+    responses={
+        200: {
+            "model": MessageDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        401: {
+            "model": ErrorDTO
+        },
+        403: {
+            "model": ErrorDTO
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def change_application_status(
+        application_id: str,
+        status_id: int,
+        access_token: str = Depends(config.oauth2_scheme),
+        db: Session = Depends(get_db),
+        user_service: UserService = Depends(UserService),
+        application_service: ApplicationService = Depends(ApplicationService),
+        auth_service: AuthService = Depends(AuthService),
+):
+    try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Change deal status) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+
+        token_data = auth_service.get_data_from_access_token(access_token)
+        user = await user_service.get_user_by_id(db, (await token_data)["sub"])
+
+        await application_service.change_application_status(db, application_id, user, status_id)
+
+        return MessageDTO(message="Status changed")
+    except jwt.PyJWTError as e:
+        logger.warning(f"(Change deal status) Bad token: {e}")
+        raise HTTPException(status_code=403, detail="Bad token")
+    except HTTPException:
+        raise
+    except FileNotFoundError:
+        logger.warning(f"(Change deal status) Application {application_id} not found")
+        raise HTTPException(status_code=404, detail="Application not found")
+    except PermissionError:
+        logger.warning(f"(Change deal status) User {user.id} has no permission to change status of application")
+        raise HTTPException(status_code=403, detail="No permission")
+    except KeyError:
+        logger.warning(f"(Change deal status) Wrong new status for application {application_id}")
+        raise HTTPException(status_code=400, detail="Wrong status")
+    # except Exception as e:
+    #     logger.error(f"(Change deal status) Error: {e}")
+    #     raise HTTPException(status_code=500, detail="Internal server error")

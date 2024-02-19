@@ -1,6 +1,7 @@
 from enum import Enum
 
-class Application_statuses(Enum):
+
+class ApplicationStatuses(Enum):
     Not_processed = 1
     Confirmed = 2
     Key_received = 3
