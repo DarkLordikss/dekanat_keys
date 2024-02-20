@@ -186,7 +186,7 @@ class ApplicationService:
         return formatted_timetable
 
     @staticmethod
-    async def show_applications_with_status(self,
+    async def show_applications_with_status(
             db: Session,
             application_showing_with_status_dto: ApplicationShowingWithStatusDTO
     ):
@@ -207,7 +207,7 @@ class ApplicationService:
             query = query.filter(subquery_statused.c.user_id == application_showing_with_status_dto.user_id)
 
         result_applications = query.all()
-        formatted_timetable = ApplicationService.fill_timetable_data_with_status(self, result_applications)
+        formatted_timetable = ApplicationService.fill_timetable_data_with_status(result_applications)
 
         return formatted_timetable
 
