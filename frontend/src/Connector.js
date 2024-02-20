@@ -16,10 +16,10 @@ export async function login(email, password) {
         
 
         if (!response.ok) {
-            if (response.status == 400) {
+            if (response.status === 400) {
                 alert('Произошла ошибка при входе!\nПроверьте правильность заполнения полей')
             }
-            else if (response.status == 500) {
+            else if (response.status === 500) {
                 alert('Произошла ошибка при входе!\nОшибка на сервере!')
             }
             return null;
@@ -44,7 +44,7 @@ export async function user(token) {
         
 
         if (!response.ok) {
-            if (response.status == 500) {
+            if (response.status === 500) {
                 alert('Произошла ошибка при входе!\nОшибка на сервере!')
             }
             return null;
@@ -55,4 +55,16 @@ export async function user(token) {
     } catch (error) {
         console.error('Error:', error.message);
     }
+}
+
+export async function checkAuth() {
+    let userToken = localStorage.getItem('keyGuardUserToken');
+    let res = await user(userToken);
+    if (res == null) {
+        return false;
+    }
+    if (res.role === 'Сотрудник деканата') {
+        return true;
+    }
+    return false;
 }
