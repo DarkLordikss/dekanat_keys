@@ -3,7 +3,7 @@
     --box-color : rgb(240, 240, 240);
     --text-dark-color : rgb(0, 0, 0);
     --text-default-color : rgb(20, 20, 20);
-    --text-light-color : rgb(40, 40, 40);
+    --text-light-color : rgb(80, 80, 80);
     --text-alt-color : rgb(240, 240, 240);
     --button-default : rgb(40, 120, 255);
     --button-default-a : rgb(84, 147, 255);
@@ -63,9 +63,18 @@ input:active {
     text-align: right;
 }
 
+.vertical-top {
+    vertical-align: top;
+}
+.vertical-middle {
+    vertical-align: middle;
+}
+.vertical-bottom {
+    vertical-align: bottom;
+}
+
 .raw-object {
     min-height: 20px;
-    min-width: 20px;
     display: inline-block;
     padding: 0;
     margin: 0;
@@ -73,10 +82,23 @@ input:active {
     min-width: 300px;
     max-width: 1000px;
 }
+.nullable-object {
+    min-width: 0;
+}
 
 .raw-box {
     border-radius: 3px;
     background-color: var(--box-color);
+}
+
+.filling-box {
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--text-light-color);
+    background-color: var(--back-color);
+}
+.day-box {
+    height: 140px;
 }
 
 .button-default {
@@ -114,8 +136,14 @@ input:active {
     padding-left: 3px;
     padding-right: 3px;
 }
+.padding-h-l-normal {
+    padding-left: 6px;
+}
 .padding-h-normal {
     padding-left: 6px;
+    padding-right: 6px;
+}
+.padding-h-r-normal {
     padding-right: 6px;
 }
 .padding-h-big {
@@ -191,6 +219,9 @@ input:active {
 .text-default {
     color: var(--text-default-color);
 }
+.text-blue {
+    color: var(--button-default);
+}
 .text-light {
     color: var(--text-light-color);
 }
@@ -238,8 +269,14 @@ input:active {
 .w20-obj {
     width: 20%;
 }
+.w12_5-obj {
+    width: 12.5%;
+}
 .w10-obj {
     width: 10%;
+}
+.w8-obj {
+    width: 8%;
 }
 .w5-obj {
     width: 5%;
