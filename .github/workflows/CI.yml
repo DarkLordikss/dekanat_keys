@@ -2,10 +2,10 @@ name: CI
 
 on: [push, pull_request]
 
-jobs:        
-  deploy-backend:
+jobs:
+  deploy:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/backend'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -17,7 +17,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /root/dekanat_keys 
+            cd /root/dekanat_keys
             git fetch --all
-            git reset --hard origin/backend
-            docker-compose up --build -d docker-compose up -d --build --force-recreate
+            git reset --hard origin/main
+            docker-compose up -d --build --force-recreate

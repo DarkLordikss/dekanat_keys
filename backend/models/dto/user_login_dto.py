@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, constr
 
-import backend.config as config
+import config
 
 
 class UserLoginDTO(BaseModel):

@@ -4,19 +4,19 @@ from fastapi import HTTPException, Depends, APIRouter
 
 import jwt
 
-from backend.models.dto.message_dto import MessageDTO
-from backend.storage.db_config import get_db
+from models.dto.message_dto import MessageDTO
+from storage.db_config import get_db
 from sqlalchemy.orm import Session
 
-from backend.models.dto.user_login_dto import UserLoginDTO
-from backend.models.dto.user_access_token_dto import UserAccessTokenDTO
+from models.dto.user_login_dto import UserLoginDTO
+from models.dto.user_access_token_dto import UserAccessTokenDTO
 
-from backend.services.user_service import UserService
-from backend.services.auth_service import AuthService
-from backend.models.dto.user_profile_dto import UserProfileDTO
-from backend.models.dto.error_dto import ErrorDTO
+from services.user_service import UserService
+from services.auth_service import AuthService
+from models.dto.user_profile_dto import UserProfileDTO
+from models.dto.error_dto import ErrorDTO
 
-from backend.config import oauth2_scheme
+from config import oauth2_scheme
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

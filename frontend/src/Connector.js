@@ -1,4 +1,4 @@
-const default_way = 'http://89.23.106.97:8118/api/v1/';
+const default_way = 'https://zomnbi-mozgi-kushat-iii-backend.pmc-python.ru/api/v1/';
 
 export async function login(email, password) {
     let data_body = JSON.stringify({
