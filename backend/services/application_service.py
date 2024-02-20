@@ -2,15 +2,18 @@ import logging
 import uuid
 
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
+from typing import List
 
 from models.dto.application_create_dto import ApplicationCreateDTO
 from models.dto.application_showing_dto import ApplicationShowingDTO
+from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
 from models.dto.formatted_application_dto import Pair
 from models.enum.applicationstatuses import ApplicationStatuses
 from models.enum.userroles import UserRoles
 from models.tables.application import Application
 from models.tables.classroom import Classroom
+from models.tables.confirm_status import ConfirmStatus
 from models.tables.user import User
 
 from datetime import datetime, timedelta, date
@@ -132,6 +135,24 @@ class ApplicationService:
             self.logger.error(f"(Delete all students) Error: {e}")
             raise
 
+    async def check_correct_statuses(self, db: Session, statuses: List[int]) -> bool:
+        try:
+            filter_condition = (
+                or_(ConfirmStatus.id == status for status in statuses)
+            )
+            count = db.query(ConfirmStatus).filter(filter_condition).count()
+
+            if count == len(statuses):
+                self.logger.info(f"(Check correct statuses) statuses with id {statuses} exist")
+                return False
+            else:
+                self.logger.warning(f"(Check correct statuses) statuses with id {statuses} not found")
+                return True
+
+        except Exception as e:
+            self.logger.error(f"(Check correct statuses) Error: {e}")
+            raise
+
     @staticmethod
     async def show_applications(
             db: Session,
@@ -161,6 +182,54 @@ class ApplicationService:
 
         result_applications = query.all()
         formatted_timetable = ApplicationService.fill_timetable_data(result_applications)
+
+        return formatted_timetable
+
+    @staticmethod
+    async def show_applications_with_status(self,
+            db: Session,
+            application_showing_with_status_dto: ApplicationShowingWithStatusDTO
+    ):
+        subquery_statused = db \
+            .query(Application) \
+            .filter(Application.class_date == application_showing_with_status_dto.date) \
+            .filter(or_(Application.application_status_id == status.value for status in application_showing_with_status_dto.statuses)) \
+            .subquery()
+
+        query = db \
+            .query(Classroom, subquery_statused) \
+            .filter(Classroom.building == application_showing_with_status_dto.building) \
+            .filter(Classroom.number.in_(application_showing_with_status_dto.classrooms))
+
+        query = query.join(subquery_statused, subquery_statused.c.classroom_id == Classroom.id)
+
+        if application_showing_with_status_dto.user_id is not None:
+            query = query.filter(subquery_statused.c.user_id == application_showing_with_status_dto.user_id)
+
+        result_applications = query.all()
+        formatted_timetable = ApplicationService.fill_timetable_data_with_status(self, result_applications)
+
+        return formatted_timetable
+
+    @staticmethod
+    def fill_timetable_data_with_status(result_applications):
+        formatted_timetable = {}
+
+        for classroom in result_applications:
+            pair = Pair(
+                classroom_id=classroom.id,
+                status=classroom[0].application_status_id,
+                name=classroom.name,
+                description=classroom.description,
+                buildings=classroom[0].building,
+                class_number=classroom[0].number
+            )
+            pair_number = classroom.time_table_id
+
+            if pair_number in formatted_timetable:
+                formatted_timetable[pair_number].append(pair)
+            else:
+                formatted_timetable[pair_number] = [pair]
 
         return formatted_timetable
 
