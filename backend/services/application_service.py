@@ -6,9 +6,9 @@ from sqlalchemy import or_
 
 from models.dto.application_create_dto import ApplicationCreateDTO
 from models.dto.application_showing_dto import ApplicationShowingDTO
-from models.dto.formatted_application_dto import FormattedTimetable, Pair
-from models.enum.application_statuses import Application_statuses
-from models.enum.user_roles import User_roles
+from models.dto.formatted_application_dto import Pair
+from models.enum.applicationstatuses import ApplicationStatuses
+from models.enum.userroles import UserRoles
 from models.tables.application import Application
 from models.tables.classroom import Classroom
 from models.tables.user import User
@@ -33,7 +33,7 @@ class ApplicationService:
             new_application = Application(
                 user_id=user_id,
                 classroom_id=application_dto.classroom_id,
-                application_status_id=Application_statuses.Not_processed.value,
+                application_status_id=ApplicationStatuses.Not_processed.value,
                 application_date=datetime.utcnow() + timedelta(hours=7),
                 name=application_dto.name,
                 description=application_dto.description,
@@ -79,7 +79,7 @@ class ApplicationService:
                     Application.classroom_id == classroom_id,
                     Application.class_date == class_date,
                     Application.time_table_id == time_table_id,
-                    or_(User.role_id == User_roles.Teacher.value, User.id == user_id)
+                    or_(User.role_id == UserRoles.Teacher.value, User.id == user_id)
                 ) \
                 .all()
 
@@ -114,7 +114,7 @@ class ApplicationService:
                     Application.classroom_id == classroom_id,
                     Application.class_date == class_date,
                     Application.time_table_id == time_table_id,
-                    or_(User.role_id == User_roles.Student.value, User.id == user_id)
+                    or_(User.role_id == UserRoles.Student.value, User.id == user_id)
                 ) \
                 .all()
 
@@ -123,7 +123,7 @@ class ApplicationService:
                     self.logger.warning(f"(Delete all students) Пользователь ({user_id}) уже заняли эту аудиторию")
                     return True
 
-                application.application_status_id = Application_statuses.Rejected.value
+                application.application_status_id = ApplicationStatuses.Rejected.value
 
             db.commit()
             return False
@@ -141,8 +141,8 @@ class ApplicationService:
             .query(Application) \
             .filter(Application.class_date == application_showing_dto.date) \
             .filter(or_(
-                Application.application_status_id == Application_statuses.Confirmed.value,
-                Application.application_status_id == Application_statuses.Key_received.value
+                Application.application_status_id == ApplicationStatuses.Confirmed.value,
+                Application.application_status_id == ApplicationStatuses.Key_received.value
             )) \
             .subquery()
 
@@ -160,6 +160,12 @@ class ApplicationService:
             query = query.filter(subquery_scheduled.c.user_id == application_showing_dto.user_id)
 
         result_applications = query.all()
+        formatted_timetable = ApplicationService.fill_timetable_data(result_applications)
+
+        return formatted_timetable
+
+    @staticmethod
+    def fill_timetable_data(result_applications):
         formatted_timetable = {}
 
         for classroom in result_applications:
@@ -170,31 +176,44 @@ class ApplicationService:
                 buildings=classroom[0].building,
                 class_number=classroom[0].number
             )
-            class_number = classroom.time_table_id
+            pair_number = classroom.time_table_id
 
-            if class_number in formatted_timetable:
-                formatted_timetable[class_number].append(pair)
+            if pair_number in formatted_timetable:
+                formatted_timetable[pair_number].append(pair)
             else:
-                formatted_timetable[class_number] = [pair]
+                formatted_timetable[pair_number] = [pair]
 
         return formatted_timetable
 
-    @staticmethod
-    def fill_timetable_data(result_applications, formatted_timetable: FormattedTimetable):
-        class_number = 0
-        pair = Pair()
+    async def change_application_status(self, db: Session, application_id: str, user: User, new_status: int):
+        try:
+            application = db.query(Application).filter(Application.id == application_id).first()
 
-        for classroom, subquery_scheduled in result_applications:
-            pair = Pair(**{
-                "classroom_id": classroom.id,
-                "name": subquery_scheduled.c.name,
-                "description": subquery_scheduled.c.description,
-                "buildings": classroom.building,
-                "class_number": classroom.number
-            })
-            class_number = subquery_scheduled.c.time_table_id
+            if not application:
+                raise FileNotFoundError
 
-        if class_number in formatted_timetable.timetable:
-            formatted_timetable.timetable[class_number].append(pair)
-        else:
-            formatted_timetable.timetable[class_number] = [pair]
+            if user.role_id != UserRoles.Dean_office_employee.value:
+                raise PermissionError
+
+            if new_status <= application.application_status_id or new_status > len(ApplicationStatuses):
+                raise KeyError
+
+            application.application_status_id = new_status
+            db.commit()
+
+            self.logger.info(f"(Change application status) Application status with id {application_id} updated "
+                             f"successfully")
+            return application_id
+        except FileNotFoundError:
+            self.logger.warning(f"(Change application status) Application with id {application_id} not found")
+            raise
+        except PermissionError:
+            self.logger.warning(f"(Change application status) User with id {user.id} has no permission for this "
+                                f"application")
+            raise
+        except KeyError:
+            self.logger.warning(f"(Change application status) Incorrect status")
+            raise
+        except Exception as e:
+            self.logger.error(f"(Change application status)  Error: {e}")
+            raise
