@@ -5,12 +5,12 @@ from fastapi import HTTPException, Depends, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from requests import Session
 
-from backend.models.dto.error_dto import ErrorDTO
-from backend.models.dto.user_access_token_dto import UserAccessTokenDTO
+from models.dto.error_dto import ErrorDTO
+from models.dto.user_access_token_dto import UserAccessTokenDTO
 
-from backend.services.auth_service import AuthService
-from backend.services.user_service import UserService
-from backend.storage.db_config import get_db
+from services.auth_service import AuthService
+from services.user_service import UserService
+from storage.db_config import get_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

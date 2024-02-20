@@ -1,7 +1,8 @@
-
+env/
 .idea/
-
 *.pyc
+
+data/certbot/conf/
 
 /mobile/*.iml
 /mobile/.gradle
