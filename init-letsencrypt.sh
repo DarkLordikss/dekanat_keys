@@ -1,6 +1,6 @@
 #!/bin/bash
 
-domains=("zomnbi-mozgi-kushat-iii.pmc-python.ru" "zomnbi-mozgi-kushat-iii-backend.pmc-python.ru")
+domains=("redmine.pmc-python.ru" "zomnbi-mozgi-kushat-iii.pmc-python.ru" "zomnbi-mozgi-kushat-iii-backend.pmc-python.ru")
 email="ievchatov@inbox.ru" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 

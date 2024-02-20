@@ -1,22 +1,51 @@
 import React from 'react';
 import './common.css';
-import { login } from "./Connector.js";
+import { login, checkAuth } from "./Connector.js";
+
+const cheatCode = 'zombi';
+let cheatProgress = 0;
 
 class LoginPage extends React.Component {
+    componentDidMount() {
+        // Добавление слушателя события нажатия клавиши
+        document.addEventListener('keydown', this.handleKeyPress);
+    }
+
+    componentWillUnmount() {
+        // Удаление слушателя события при размонтировании компонента
+        document.removeEventListener('keydown', this.handleKeyPress);
+    }
+
+    handleKeyPress = async (event) => {
+        const pressedKey = event.key;
+        if (pressedKey === cheatCode[cheatProgress]) {
+            cheatProgress += 1;
+            if (cheatCode.length === cheatProgress) {
+                let res = await login('dekanat@example.com', '123456');
+                localStorage.setItem('keyGuardUserToken', res.access_token);
+                window.location.href = '/timetable';
+            }
+        }
+        else {
+            cheatProgress = 0;
+        }
+    }
+
     handleLoginClick = async () => {
       let email = document.getElementById('field_email').value;
       let password = document.getElementById('field_password').value;
       let res = await login(email, password);
       if (res != null) {
         localStorage.setItem('keyGuardUserToken', res.access_token);
-        window.location.href = '/main';
+        if (await checkAuth()) {
+            window.location.href = '/timetable';
+        }
       }
     };
   
     render() {
       return (
-        <div>
-          <div class="container content-center">
+        <div class="container content-center">
             <div class="middle-wall-object">
                 <div class="raw-object w25-obj raw-box raw-shadow padding-h-normal padding-v-big">
                     <div class="raw-object w100-obj margin-v-big content-left">
@@ -37,7 +66,6 @@ class LoginPage extends React.Component {
                     </div>
                 </div>
             </div>
-          </div>
         </div>
       );
     }

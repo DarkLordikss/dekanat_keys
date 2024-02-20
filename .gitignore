@@ -3,6 +3,7 @@ env/
 *.pyc
 
 data/certbot/conf/
+data/redmine_db_data/
 
 /mobile/*.iml
 /mobile/.gradle
