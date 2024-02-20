@@ -9,10 +9,13 @@ from datetime import timedelta, date
 
 from models.dto.application_create_dto import ApplicationCreateDTO
 from models.dto.application_showing_dto import ApplicationShowingDTO
+from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
 from models.dto.error_dto import ErrorDTO
 from models.dto.formatted_application_dto import FormattedTimetable, Day
+from models.dto.formatted_application_with_status_dto import FormattedTimetableWithStatus, DayWithStatus
 from models.dto.message_dto import MessageDTO
 from models.enum.userroles import UserRoles
+from models.enum.applicationstatuses import ApplicationStatuses
 from models.tables.classroom import Classroom
 from models.tables.user import User
 from storage.db_config import get_db
@@ -225,6 +228,103 @@ async def show_applications(
         logger.error(f"(Application) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
+@application_router.get(
+    "/show_with_status/",
+    response_model=FormattedTimetableWithStatus,
+    responses={
+        200: {
+            "model": FormattedTimetableWithStatus
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def show_applications_with_status(
+        building: int,
+        start_date: date,
+        end_date: date = None,
+        classrooms: list[int] = Query(),
+        statuses: list[int] = Query(),
+        user_id: UUID = None,
+        db: Session = Depends(get_db),
+        application_service: ApplicationService = Depends(ApplicationService),
+        classroom_service: ClassroomService = Depends(ClassroomService),
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
+):
+    try:
+        if not end_date:
+            end_date = start_date
+
+        timetables = []
+        schedule = []
+        current_date = start_date
+
+        if await application_service.check_correct_statuses(db, statuses):
+            raise HTTPException(status_code=404, detail="statuses not found")
+
+        if await entity_verifier_service.check_correct_dates(start_date, end_date):
+            raise HTTPException(status_code=400, detail="invalid date")
+
+        if await entity_verifier_service.check_existence(
+            db,
+            Classroom,
+            Classroom.building == building,
+            f"(Check building existence) building with number {building} exists",
+            f"(Check building existence) building with number {building} not found",
+            building_number=building
+        ):
+            raise HTTPException(status_code=404, detail="building not found")
+
+        if await classroom_service.check_correct_classrooms(db, classrooms, building):
+            raise HTTPException(status_code=404, detail="Classrooms not found")
+
+        if await entity_verifier_service.check_existence(
+                db,
+                User,
+                User.id == user_id,
+                f"(Check user existence) user with id {user_id} exists",
+                f"(Check user existence) user with id {user_id} not found",
+                user_id_func=user_id
+        ) and user_id is not None:
+            raise HTTPException(status_code=404, detail="user not found")
+
+        while current_date <= end_date:
+            application_showing_with_status_dto = ApplicationShowingWithStatusDTO(
+                building=building,
+                classrooms=classrooms,
+                statuses=statuses,
+                user_id=user_id,
+                date=current_date
+            )
+
+            timetables.append(application_service.show_applications_with_status(db, application_showing_with_status_dto))
+
+            daily_applications = DayWithStatus(
+                date=current_date,
+                timetable={}
+            )
+
+            schedule.append(daily_applications)
+            current_date += timedelta(days=1)
+
+        for index in range(len(schedule)):
+            schedule[index].timetable = await timetables[index]
+
+        return FormattedTimetableWithStatus(schedule=schedule)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Application) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @application_router.post(
     "/change_deal_status/{application_id}",
