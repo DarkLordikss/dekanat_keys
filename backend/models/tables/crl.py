@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import Column, String, UUID
-from backend.storage.db_config import Base
+from storage.db_config import Base
 
 
 class CRL(Base):

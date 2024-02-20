@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from datetime import datetime, timedelta
 
-from backend.models.tables.crl import CRL
+from models.tables.crl import CRL
 
 
 class AuthService:
