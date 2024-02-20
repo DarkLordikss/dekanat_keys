@@ -56,12 +56,12 @@ services:
     env_file:
       - env/backend.env
     restart: always
-    ports:
-      - 8118:8000
+    expose:
+      - 8000
     networks:
       - default
 
 networks:
-  mix_net:
+  oko_net:
     name: oko_net
     internal: true
