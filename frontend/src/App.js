@@ -1,6 +1,6 @@
 import React from 'react';
 import LoginPage from './LoginPage';
-import MainPage from './MainPage';
+import TimetablePage from './TimetablePage';
 
 function App() {
   // Получаем текущий путь из URL
@@ -10,8 +10,8 @@ function App() {
   let currentComponent;
   if (currentPath === '/') {
     currentComponent = <LoginPage />;
-  } else if (currentPath === '/main') {
-    currentComponent = <MainPage />;
+  } else if (currentPath === '/timetable') {
+    currentComponent = <TimetablePage />;
   } else {
     // Если путь не соответствует ни одному известному, можно отобразить страницу 404
     currentComponent = <div>404 Not Found</div>;
