@@ -218,7 +218,7 @@ class ApplicationService:
         for classroom in result_applications:
             pair = Pair(
                 classroom_id=classroom.id,
-                status=classroom[0].application_status_id,
+                status=classroom.application_status_id,
                 name=classroom.name,
                 description=classroom.description,
                 buildings=classroom[0].building,
