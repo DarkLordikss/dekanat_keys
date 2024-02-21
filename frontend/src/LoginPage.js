@@ -1,5 +1,8 @@
 import React from 'react';
-import './common.css';
+import './styles/Common.css';
+import './styles/ObjectsWidth.css';
+import './styles/SpacingStyles.css';
+import './styles/TextStyles.css';
 import { login, checkAuth } from "./Connector.js";
 
 const cheatCode = 'zombi';
