@@ -11,6 +11,7 @@ class Pair(BaseModel):
     description: str
     buildings: int
     class_number: int
+    status: int
 
 
 class Day(BaseModel):
