@@ -15,7 +15,6 @@ from models.dto.formatted_application_dto import FormattedTimetable, Day
 from models.dto.formatted_application_with_status_dto import FormattedTimetableWithStatus, DayWithStatus
 from models.dto.message_dto import MessageDTO
 from models.enum.userroles import UserRoles
-from models.enum.applicationstatuses import ApplicationStatuses
 from models.tables.classroom import Classroom
 from models.tables.user import User
 from storage.db_config import get_db
@@ -325,6 +324,7 @@ async def show_applications_with_status(
     except Exception as e:
         logger.error(f"(Application) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @application_router.post(
     "/change_deal_status/{application_id}",
