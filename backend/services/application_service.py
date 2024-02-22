@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 from typing import List
 
 from models.dto.application_create_dto import ApplicationCreateDTO
@@ -193,7 +193,8 @@ class ApplicationService:
         subquery_statused = db \
             .query(Application) \
             .filter(Application.class_date == application_showing_with_status_dto.date) \
-            .filter(or_(Application.application_status_id == status.value for status in application_showing_with_status_dto.statuses)) \
+            .filter(or_(Application.application_status_id == status.value for
+                        status in application_showing_with_status_dto.statuses)) \
             .subquery()
 
         query = db \
@@ -218,12 +219,13 @@ class ApplicationService:
         for classroom in result_applications:
             pair = Pair(
                 classroom_id=classroom.id,
-                status=classroom.application_status_id,
+                status=classroom[4],
                 name=classroom.name,
                 description=classroom.description,
                 buildings=classroom[0].building,
                 class_number=classroom[0].number
             )
+            print(pair)
             pair_number = classroom.time_table_id
 
             if pair_number in formatted_timetable:
