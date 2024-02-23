@@ -5,10 +5,9 @@ from datetime import date
 from typing import List, Optional
 
 
-class ApplicationShowingDTO(BaseModel):
+class AvailableClassroomsShowingDTO(BaseModel):
     building: int
     classrooms: List[int]
-    scheduled: bool
     user_id: Optional[UUID] = None
     date: date
 
