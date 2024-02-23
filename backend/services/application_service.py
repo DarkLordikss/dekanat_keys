@@ -2,13 +2,11 @@ import logging
 import uuid
 
 from sqlalchemy.orm import Session
-<<<<<<< Updated upstream
-from sqlalchemy import or_
-=======
+
 from sqlalchemy import or_, and_, not_, join, select
 from sqlalchemy.sql import text
 
->>>>>>> Stashed changes
+
 from typing import List
 
 from models.dto.application_create_dto import ApplicationCreateDTO
@@ -219,13 +217,8 @@ class ApplicationService:
         subquery_statused = db \
             .query(Application) \
             .filter(Application.class_date == application_showing_with_status_dto.date) \
-<<<<<<< Updated upstream
-            .filter(or_(Application.application_status_id == status.value for
-                        status in application_showing_with_status_dto.statuses)) \
-=======
             .filter(or_(Application.application_status_id == status.value
                         for status in application_showing_with_status_dto.statuses)) \
->>>>>>> Stashed changes
             .subquery()
 
         query = db \
