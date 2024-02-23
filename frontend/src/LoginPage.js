@@ -3,6 +3,7 @@ import './styles/Common.css';
 import './styles/ObjectsWidth.css';
 import './styles/SpacingStyles.css';
 import './styles/TextStyles.css';
+import './styles/ButtonsStyles.css';
 import { login, checkAuth } from "./Connector.js";
 
 const cheatCode = 'zombi';

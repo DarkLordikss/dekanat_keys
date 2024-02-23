@@ -3,8 +3,9 @@ import './styles/Common.css';
 import './styles/ObjectsWidth.css';
 import './styles/SpacingStyles.css';
 import './styles/TextStyles.css';
+import './styles/ButtonsStyles.css';
 import { checkAuth, getTimetable } from "./Connector.js";
-import { getStatusString, parseDate, getBarriers, parseSmallDate} from "./Parsers.js";
+import { getStatusString, parseDate, getBarriers, parseSmallDate, getStatusStyle} from "./Parsers.js";
 
 class TimetablePage extends React.Component {
   constructor() {
@@ -40,7 +41,7 @@ class TimetablePage extends React.Component {
         for (let k = 0; k < time.length; k++) {
           let pare = time[k];
           document.getElementById(`day_box_${i}_${j}`).innerHTML += 
-          `<div class="raw-object w100-obj nullable-object raw-box button-default margin-v-normal padding-h-normal padding-v-normal">
+          `<div class="raw-object w100-obj nullable-object raw-box ${await getStatusStyle(pare.status)} margin-v-normal padding-h-normal padding-v-normal">
             <div class="raw-object w100-obj nullable-object text-big text-width-bold">${pare.name}</div>
             <div class="raw-object w100-obj nullable-object text-normal margin-v-b-normal">${pare.buildings} к., ${pare.class_number} ауд.</div>
             <div class="raw-object w100-obj nullable-object text-normal margin-v-b-normal">${await getStatusString(pare.status)}</div>

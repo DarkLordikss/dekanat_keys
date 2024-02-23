@@ -7,6 +7,15 @@ const StatusEnum = {
     6: 'Недействительно'
 };
 
+const StatusStyleEnum = {
+    1: 'button-default',
+    2: 'button-good',
+    3: 'button-warning',
+    4: 'button-gifted',
+    5: 'button-wrong',
+    6: 'button-inactive'
+};
+
 export const MonthEnum = {
     "01": 'янв',
     "02": 'фев',
@@ -25,6 +34,10 @@ export const MonthEnum = {
 // Функция для преобразования числового значения в строковое представление
 export const getStatusString = async (statusValue) => {
     return StatusEnum[statusValue] || 'Неизвестно';
+};
+
+export const getStatusStyle = async (statusValue) => {
+    return StatusStyleEnum[statusValue] || 'button-default';
 };
 
 export const parseDate = async (date) => {
