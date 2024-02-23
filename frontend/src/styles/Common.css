@@ -93,6 +93,9 @@ input:active {
 .nullable-object {
     min-width: 0;
 }
+.scrollable-object {
+    overflow-y: scroll;
+}
 
 .raw-box {
     border-radius: 3px;
@@ -106,7 +109,7 @@ input:active {
     background-color: var(--back-color);
 }
 .day-box {
-    height: 140px;
+    height: 160px;
 }
 
 
