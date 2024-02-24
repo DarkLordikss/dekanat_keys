@@ -1,0 +1,151 @@
+/* Внутр. отступы */
+/* Внутр. отступы вертикальные */
+.padding-v-t-small {
+    padding-top: 3px;
+}
+.padding-v-small {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+.padding-v-b-small {
+    padding-bottom: 3px;
+}
+.padding-v-t-normal {
+    padding-top: 6px;
+}
+.padding-v-normal {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+.padding-v-b-normal {
+    padding-bottom: 6px;
+}
+.padding-v-t-big {
+    padding-top: 9px;
+}
+.padding-v-big {
+    padding-top: 9px;
+    padding-bottom: 9px;
+}
+.padding-v-b-big {
+    padding-bottom: 9px;
+}
+
+/* Внутр. отступы горизонтальные */
+.padding-h-l-small {
+    padding-right: 3px;
+}
+.padding-h-small {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+.padding-h-r-small {
+    padding-right: 3px;
+}
+.padding-h-l-normal {
+    padding-left: 6px;
+}
+.padding-h-normal {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+.padding-h-r-normal {
+    padding-right: 6px;
+}
+.padding-h-l-big {
+    padding-left: 9px;
+}
+.padding-h-big {
+    padding-left: 9px;
+    padding-right: 9px;
+}
+.padding-h-r-big {
+    padding-right: 9px;
+}
+
+
+/* Внешн. отступы */
+/* Внешн. отступы вертикальные */
+.margin-v-t-small {
+    margin-top: 3px;
+}
+.margin-v-small {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+.margin-v-b-small {
+    margin-bottom: 3px;
+}
+.margin-v-t-normal {
+    margin-top: 6px;
+}
+.margin-v-normal {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+.margin-v-b-normal {
+    margin-bottom: 6px;
+}
+.margin-v-t-big {
+    margin-top: 9px;
+}
+.margin-v-big {
+    margin-top: 9px;
+    margin-bottom: 9px;
+}
+.margin-v-b-big {
+    margin-bottom: 9px;
+}
+.margin-v-t-huge {
+    margin-top: 12px;
+}
+.margin-v-huge {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+.margin-v-b-huge {
+    margin-bottom: 12px;
+}
+
+
+/* Внешн. отступы горизонтальные */
+.margin-h-l-small {
+    margin-left: 3px;
+}
+.margin-h-small {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+.margin-h-r-small {
+    margin-right: 3px;
+}
+.margin-h-l-normal {
+    margin-left: 6px;
+}
+.margin-h-normal {
+    margin-left: 6px;
+    margin-right: 6px;
+}
+.margin-h-r-normal {
+    margin-right: 6px;
+}
+.margin-h-l-big {
+    margin-left: 9px;
+}
+.margin-h-big {
+    margin-left: 9px;
+    margin-right: 9px;
+}
+.margin-h-r-big {
+    margin-right: 9px;
+}
+.margin-h-l-huge {
+    margin-left: 12px;
+}
+.margin-h-huge {
+    margin-left: 12px;
+    margin-right: 12px;
+}
+.margin-h-r-huge {
+    margin-right: 12px;
+}

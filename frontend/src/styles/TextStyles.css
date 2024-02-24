@@ -1,0 +1,38 @@
+.text-width-bold {
+    font-weight: 600;
+}
+.text-width-normal {
+    font-weight: 500;
+}
+.text-width-weak {
+    font-weight: 300;
+}
+
+.text-dark {
+    color: var(--text-dark-color);
+}
+.text-default {
+    color: var(--text-default-color);
+}
+.text-blue {
+    color: var(--button-default);
+}
+.text-light {
+    color: var(--text-light-color);
+}
+.text-invis {
+    color: rgba(0, 0, 0, 0);
+}
+
+.text-small {
+    font-size: 10pt;
+}
+.text-normal {
+    font-size: 14pt;
+}
+.text-big {
+    font-size: 18pt;
+}
+.text-huge {
+    font-size: 22pt;
+}

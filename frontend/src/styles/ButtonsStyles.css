@@ -1,0 +1,83 @@
+.button-default {
+    background-color: var(--button-default);
+    color: var(--text-alt-color);
+    transition: 0.2s;
+}
+.button-default:hover {
+    background-color: var(--button-default-h);
+    transition: 0.1s;
+}
+.button-default:active {
+    background-color: var(--button-default-a);
+    transition: 0.03s;
+}
+
+.button-wrong {
+    background-color: var(--button-wrong);
+    color: var(--text-alt-color);
+    transition: 0.2s;
+}
+.button-wrong:hover {
+    background-color: var(--button-wrong-h);
+    transition: 0.1s;
+}
+.button-wrong:active {
+    background-color: var(--button-wrong-a);
+    transition: 0.03s;
+}
+
+.button-good {
+    background-color: var(--button-);
+    color: var(--text-alt-color);
+    transition: 0.2s;
+}
+.button-good:hover {
+    background-color: var(--button-good-h);
+    transition: 0.1s;
+}
+.button-good:active {
+    background-color: var(--button-good-a);
+    transition: 0.03s;
+}
+
+.button-warning {
+    background-color: var(--button-);
+    color: var(--text-alt-color);
+    transition: 0.2s;
+}
+.button-warning:hover {
+    background-color: var(--button-warning-h);
+    transition: 0.1s;
+}
+.button-warning:active {
+    background-color: var(--button-warning-a);
+    transition: 0.03s;
+}
+
+.button-gifted {
+    background-color: var(--button-);
+    color: var(--text-alt-color);
+    transition: 0.2s;
+}
+.button-gifted:hover {
+    background-color: var(--button-gifted-h);
+    transition: 0.1s;
+}
+.button-gifted:active {
+    background-color: var(--button-gifted-a);
+    transition: 0.03s;
+}
+
+.button-inactive {
+    background-color: var(--button-inactive);
+    color: var(--text-alt-color);
+    transition: 0.2s;
+}
+.button-inactive:hover {
+    background-color: var(--button-inactive-h);
+    transition: 0.1s;
+}
+.button-inactive:active {
+    background-color: var(--button-inactive-a);
+    transition: 0.03s;
+}
