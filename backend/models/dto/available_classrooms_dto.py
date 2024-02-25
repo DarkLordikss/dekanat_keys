@@ -8,7 +8,6 @@ from typing import List, Optional
 class AvailableClassroomsShowingDTO(BaseModel):
     building: int
     classrooms: List[int]
-    user_id: Optional[UUID] = None
     date: date
 
     @field_validator('date')

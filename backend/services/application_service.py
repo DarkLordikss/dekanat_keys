@@ -10,9 +10,9 @@ from sqlalchemy.sql import text
 from typing import List
 
 from models.dto.application_create_dto import ApplicationCreateDTO
-from models.dto.application_showing_dto import AvailableClassroomsShowingDTO
+from models.dto.available_classrooms_dto import AvailableClassroomsShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
-from models.dto.formatted_application_dto import Classroom_for_pair
+from models.dto.formatted_available_classrooms_dto import Classroom_for_pair
 from models.enum.applicationstatuses import ApplicationStatuses
 from models.enum.userroles import UserRoles
 from models.tables.application import Application

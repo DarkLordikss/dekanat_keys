@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 from datetime import timedelta, date
 
 from models.dto.application_create_dto import ApplicationCreateDTO
-from models.dto.application_showing_dto import ApplicationShowingDTO
+from models.dto.available_classrooms_dto import AvailableClassroomsShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
 from models.dto.error_dto import ErrorDTO
-from models.dto.formatted_application_dto import FormattedTimetable, Day
+from models.dto.formatted_available_classrooms_dto import FormattedTimetable, Day
 from models.dto.formatted_application_with_status_dto import FormattedTimetableWithStatus, DayWithStatus
 from models.dto.message_dto import MessageDTO
 from models.enum.userroles import UserRoles
@@ -135,7 +135,7 @@ async def create_application(
 
 
 @application_router.get(
-    "/show/",
+    "/show_available_classrooms/",
     response_model=FormattedTimetable,
     responses={
         200: {
@@ -152,13 +152,11 @@ async def create_application(
         }
     }
 )
-async def show_applications(
+async def show_available_classrooms(
         building: int,
         start_date: date,
         end_date: date = None,
-        scheduled: bool = True,
         classrooms: list[int] = Query(),
-        user_id: UUID = None,
         db: Session = Depends(get_db),
         application_service: ApplicationService = Depends(ApplicationService),
         classroom_service: ClassroomService = Depends(ClassroomService),
@@ -188,26 +186,14 @@ async def show_applications(
         if await classroom_service.check_correct_classrooms(db, classrooms, building):
             raise HTTPException(status_code=404, detail="Classrooms not found")
 
-        if await entity_verifier_service.check_existence(
-                db,
-                User,
-                User.id == user_id,
-                f"(Check user existence) user with id {user_id} exists",
-                f"(Check user existence) user with id {user_id} not found",
-                user_id_func=user_id
-        ) and user_id is not None:
-            raise HTTPException(status_code=404, detail="user not found")
-
         while current_date <= end_date:
-            application_showing_dto = ApplicationShowingDTO(
+            available_classrooms_showing_dto = AvailableClassroomsShowingDTO(
                 building=building,
                 classrooms=classrooms,
-                scheduled=scheduled,
-                user_id=user_id,
                 date=current_date
             )
 
-            timetables.append(application_service.show_applications(db, application_showing_dto))
+            timetables.append(application_service.show_available_classrooms(db, available_classrooms_showing_dto))
 
             daily_applications = Day(
                 date=current_date,
