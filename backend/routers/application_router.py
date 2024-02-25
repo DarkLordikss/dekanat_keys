@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from datetime import timedelta, date
 
 from models.dto.application_create_dto import ApplicationCreateDTO
+
+from models.dto.application_showing_dto import AvailableClassroomsShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
 from models.dto.error_dto import ErrorDTO
 from models.dto.formatted_application_with_status_dto import FormattedTimetableWithStatus, DayWithStatus
@@ -129,6 +131,7 @@ async def create_application(
     except Exception as e:
         logger.error(f"(Application) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 
 @application_router.get(

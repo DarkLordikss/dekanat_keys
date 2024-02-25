@@ -5,17 +5,15 @@ from pydantic import BaseModel
 from datetime import date
 
 
-class Pair(BaseModel):
+class Classroom_for_pair(BaseModel):
     classroom_id: UUID
-    name: str
-    description: str
     buildings: int
     class_number: int
     status: int
 
 
 class Day(BaseModel):
-    timetable: Dict[int, Optional[List[Pair]]]
+    timetable: Dict[int, Optional[List[Classroom_for_pair]]]
     date: Optional[date]
 
 

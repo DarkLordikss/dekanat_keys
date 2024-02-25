@@ -2,13 +2,17 @@ import logging
 import uuid
 
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+
+from sqlalchemy import or_, and_, not_, join, select
+from sqlalchemy.sql import text
+
+
 from typing import List
 
 from models.dto.application_create_dto import ApplicationCreateDTO
-from models.dto.application_showing_dto import ApplicationShowingDTO
+from models.dto.application_showing_dto import AvailableClassroomsShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
-from models.dto.formatted_application_dto import Pair
+from models.dto.formatted_application_dto import Classroom_for_pair
 from models.enum.applicationstatuses import ApplicationStatuses
 from models.enum.userroles import UserRoles
 from models.tables.application import Application
@@ -153,35 +157,55 @@ class ApplicationService:
             self.logger.error(f"(Check correct statuses) Error: {e}")
             raise
 
-    @staticmethod
-    async def show_applications(
+    #@staticmethod
+    async def show_available_classrooms(self,
             db: Session,
-            application_showing_dto: ApplicationShowingDTO
+            available_classrooms_showing_dto: AvailableClassroomsShowingDTO
     ):
-        subquery_scheduled = db \
-            .query(Application) \
-            .filter(Application.class_date == application_showing_dto.date) \
-            .filter(or_(
-                Application.application_status_id == ApplicationStatuses.Confirmed.value,
-                Application.application_status_id == ApplicationStatuses.Key_received.value
-            )) \
-            .subquery()
+        cartesian_product_with_filters = (
+            'SELECT * FROM classrooms, timeslots '
+            'WHERE '
+            'classrooms.building = :building '
+            'AND classrooms.number IN :class_numbers '
+            'AND NOT EXISTS '
+            '(SELECT * FROM applications '
+            'WHERE applications.class_date = :date_value '
+            'AND applications.application_status_id IN (:status_confirmed, :status_key_received) '
+            'AND applications.classroom_id = classrooms.id '
+            'AND applications.time_table_id = timeslots.id)'
+        )
+        query_result = db.execute(text(cartesian_product_with_filters), {
+            'building': available_classrooms_showing_dto.building,
+            'class_numbers': tuple(available_classrooms_showing_dto.classrooms),
+            'date_value': available_classrooms_showing_dto.date,
+            'status_confirmed': ApplicationStatuses.Confirmed.value,
+            'status_key_received': ApplicationStatuses.Key_received.value
+        }).fetchall()
 
-        query = db \
-            .query(Classroom, subquery_scheduled) \
-            .filter(Classroom.building == application_showing_dto.building) \
-            .filter(Classroom.number.in_(application_showing_dto.classrooms))
+        ##self.logger.info(f"DEKAT: {query_result} = {db.query(Classroom).count()} * {db.query(Timeslot).count()}")
+        for x in query_result:
+            self.logger.info(f"DEKAT: {x}")
 
-        if application_showing_dto.scheduled:
-            query = query.join(subquery_scheduled, subquery_scheduled.c.classroom_id == Classroom.id)
-        else:
-            query = query.join(subquery_scheduled, subquery_scheduled.c.classroom_id != Classroom.id)
+        available_classrooms = ApplicationService.fill_timetable_data(query_result)
 
-        if application_showing_dto.user_id is not None:
-            query = query.filter(subquery_scheduled.c.user_id == application_showing_dto.user_id)
+        return available_classrooms
 
-        result_applications = query.all()
-        formatted_timetable = ApplicationService.fill_timetable_data(result_applications)
+    @staticmethod
+    def fill_timetable_data(result_classrooms):
+        formatted_timetable = {}
+
+        for element in result_classrooms:
+            pair = Classroom_for_pair(
+                classroom_id=element[0],
+                buildings=element.building,
+                class_number=element.number
+            )
+            pair_number = element.id
+
+            if pair_number in formatted_timetable:
+                formatted_timetable[pair_number].append(pair)
+            else:
+                formatted_timetable[pair_number] = [pair]
 
         return formatted_timetable
 
@@ -193,8 +217,8 @@ class ApplicationService:
         subquery_statused = db \
             .query(Application) \
             .filter(Application.class_date == application_showing_with_status_dto.date) \
-            .filter(or_(Application.application_status_id == status.value for
-                        status in application_showing_with_status_dto.statuses)) \
+            .filter(or_(Application.application_status_id == status.value
+                        for status in application_showing_with_status_dto.statuses)) \
             .subquery()
 
         query = db \
@@ -217,7 +241,7 @@ class ApplicationService:
         formatted_timetable = {}
 
         for classroom in result_applications:
-            pair = Pair(
+            pair = Classroom_for_pair(
                 classroom_id=classroom.id,
                 status=classroom[4],
                 name=classroom.name,
@@ -226,27 +250,6 @@ class ApplicationService:
                 class_number=classroom[0].number
             )
             print(pair)
-            pair_number = classroom.time_table_id
-
-            if pair_number in formatted_timetable:
-                formatted_timetable[pair_number].append(pair)
-            else:
-                formatted_timetable[pair_number] = [pair]
-
-        return formatted_timetable
-
-    @staticmethod
-    def fill_timetable_data(result_applications):
-        formatted_timetable = {}
-
-        for classroom in result_applications:
-            pair = Pair(
-                classroom_id=classroom.id,
-                name=classroom.name,
-                description=classroom.description,
-                buildings=classroom[0].building,
-                class_number=classroom[0].number
-            )
             pair_number = classroom.time_table_id
 
             if pair_number in formatted_timetable:
