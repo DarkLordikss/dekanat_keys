@@ -3,7 +3,7 @@ from uuid import UUID
 
 import jwt
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, WebSocket
 from sqlalchemy.orm import Session
 from datetime import timedelta, date
 
@@ -76,12 +76,12 @@ async def create_application(
             raise HTTPException(status_code=404, detail="Classroom not found")
         """""
         if await entity_verifier_service.check_existence(
-            db,
-            Classroom,
-            Classroom.id == application_create_dto.classroom_id,
-            f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} exists",
-            f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} not found",
-            classroom_id=application_create_dto.classroom_id
+                db,
+                Classroom,
+                Classroom.id == application_create_dto.classroom_id,
+                f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} exists",
+                f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} not found",
+                classroom_id=application_create_dto.classroom_id
         ):
             raise HTTPException(status_code=404, detail="building not found")
 
@@ -133,7 +133,6 @@ async def create_application(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-
 @application_router.get(
     "/show_available_classrooms/",
     response_model=FormattedTimetable,
@@ -174,12 +173,12 @@ async def show_available_classrooms(
             raise HTTPException(status_code=400, detail="invalid date")
 
         if await entity_verifier_service.check_existence(
-            db,
-            Classroom,
-            Classroom.building == building,
-            f"(Check building existence) building with number {building} exists",
-            f"(Check building existence) building with number {building} not found",
-            building_number=building
+                db,
+                Classroom,
+                Classroom.building == building,
+                f"(Check building existence) building with number {building} exists",
+                f"(Check building existence) building with number {building} not found",
+                building_number=building
         ):
             raise HTTPException(status_code=404, detail="building not found")
 
@@ -260,12 +259,12 @@ async def show_applications_with_status(
             raise HTTPException(status_code=400, detail="invalid date")
 
         if await entity_verifier_service.check_existence(
-            db,
-            Classroom,
-            Classroom.building == building,
-            f"(Check building existence) building with number {building} exists",
-            f"(Check building existence) building with number {building} not found",
-            building_number=building
+                db,
+                Classroom,
+                Classroom.building == building,
+                f"(Check building existence) building with number {building} exists",
+                f"(Check building existence) building with number {building} not found",
+                building_number=building
         ):
             raise HTTPException(status_code=404, detail="building not found")
 
@@ -291,7 +290,9 @@ async def show_applications_with_status(
                 date=current_date
             )
 
-            timetables.append(application_service.show_applications_with_status(db, application_showing_with_status_dto))
+            timetables.append(
+                application_service.show_applications_with_status(db, application_showing_with_status_dto
+                                                                  ))
 
             daily_applications = DayWithStatus(
                 date=current_date,
@@ -371,6 +372,98 @@ async def change_application_status(
     except KeyError:
         logger.warning(f"(Change deal status) Wrong new status for application {application_id}")
         raise HTTPException(status_code=400, detail="Wrong status")
-    # except Exception as e:
-    #     logger.error(f"(Change deal status) Error: {e}")
-    #     raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as e:
+        logger.error(f"(Change deal status) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@application_router.post(
+    "/transfer_key/",
+    response_model=FormattedTimetableWithStatus,
+    responses={
+        200: {
+            "model": FormattedTimetableWithStatus
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def transfer_key(
+        application_id: UUID,
+        user_recipient_id: UUID,
+        access_token: str = Depends(config.oauth2_scheme),
+        db: Session = Depends(get_db),
+        user_service: UserService = Depends(UserService),
+        auth_service: AuthService = Depends(AuthService),
+        application_service: ApplicationService = Depends(ApplicationService),
+        classroom_service: ClassroomService = Depends(ClassroomService),
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
+):
+    try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Change deal status) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+
+        token_data = auth_service.get_data_from_access_token(access_token)
+        user_owner = await user_service.get_user_by_id(db, (await token_data)["sub"])
+
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Application) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@application_router.websocket(
+    "/confirm_transfering_key/",
+)
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        await websocket.send_text(f"Message text was: {data}")
+
+
+clients = []
+
+
+@application_router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    clients.append(websocket)
+
+    try:
+        while True:
+            # Получаем сообщение от клиента
+            data = await websocket.receive_text()
+            print(f"Received message: {data}")
+
+            # Рассылаем сообщение всем подключенным клиентам
+            for client in clients:
+                await client.send_text(data)
+    except Exception as e:
+        print(f"WebSocket connection error: {e}")
+        clients.remove(websocket)
+
+
+@application_router.post("/send_notification/")
+async def send_notification(message: str):
+    # Рассылка уведомления всем клиентам
+    for client in clients:
+        await client.send_text(message)
+    return {"message": "Notification sent successfully"}
+
+@application_router.post("/send_notification/")
+async def send_notification(message: str):
+    # Рассылка уведомления всем клиентам
+    for client in clients:
+        await client.send_text(message)
+    return {"message": "Notification sent successfully"}

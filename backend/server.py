@@ -13,7 +13,7 @@ from routers.user_router import user_router
 from storage.storage_init import init_db
 
 from services.email_service import EmailService
-
+from websockets.notification_websocket import notifications_websocket
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,6 +25,7 @@ router.include_router(test_router)
 router.include_router(classroom_router)
 router.include_router(application_router)
 
+
 app = FastAPI()
 app.include_router(router)
 app.add_middleware(
@@ -34,6 +35,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/ws", notifications_websocket)
 
 if __name__ == "__main__":
     email_service = EmailService()
