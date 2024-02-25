@@ -5,6 +5,7 @@ from fastapi import HTTPException, Depends, APIRouter
 import jwt
 
 from models.dto.message_dto import MessageDTO
+from services.email_service import EmailService
 from storage.db_config import get_db
 from sqlalchemy.orm import Session
 
@@ -15,6 +16,7 @@ from services.user_service import UserService
 from services.auth_service import AuthService
 from models.dto.user_profile_dto import UserProfileDTO
 from models.dto.error_dto import ErrorDTO
+from models.dto.user_reg_dto import UserRegDTO
 
 from config import oauth2_scheme
 
@@ -62,6 +64,86 @@ async def login(user_login_dto: UserLoginDTO,
         raise
     except Exception as e:
         logger.error(f"(Login) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@user_router.post(
+    "/register/",
+    response_model=MessageDTO,
+    responses={
+        200: {
+            "model": MessageDTO
+
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def register(user_reg_dto: UserRegDTO,
+                   db: Session = Depends(get_db),
+                   user_service: UserService = Depends(UserService),
+                   email_service: EmailService = Depends(EmailService)
+                   ):
+    try:
+        user = await user_service.get_user_by_email(db, user_reg_dto.email)
+
+        if user:
+            logger.warning(f"(Reg) User already registered: {user_reg_dto.email}")
+            raise HTTPException(status_code=400, detail="User already exists")
+
+        user = await user_service.create_user(db, user_reg_dto.email, user_reg_dto.password, user_reg_dto.full_name)
+
+        email_service.send_link(user.secret_key, user.email)
+
+        logger.info(f"(Reg) User successful registered: {user.id}")
+        return MessageDTO(message=str(user.id))
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Reg) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@user_router.get(
+    "/verify/{key}",
+    response_model=MessageDTO,
+    responses={
+        200: {
+            "model": MessageDTO
+
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def verify(key: str,
+                 db: Session = Depends(get_db),
+                 user_service: UserService = Depends(UserService),
+                 ):
+    try:
+        user = await user_service.get_user_by_secret_key(db, key)
+
+        if not user or user.is_verified or await user_service.get_user_by_email(db, user.email):
+            logger.warning(f"(Verify) User not exists or verified: {key}")
+            raise HTTPException(status_code=404, detail="Not found")
+
+        await user_service.verify_user(db, key)
+
+        logger.info(f"(Verify) User verified registered: {user.id}")
+
+        return MessageDTO(message=str(user.id))
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Verify) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
