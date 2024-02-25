@@ -1,5 +1,7 @@
 package com.liid.dekanatkeys.models
 
+import com.liid.dekanatkeys.models.user.LoginRequest
+import com.liid.dekanatkeys.models.user.LoginResponse
 import com.liid.dekanatkeys.models.user.UserProfile
 import retrofit2.Call
 import retrofit2.http.Body

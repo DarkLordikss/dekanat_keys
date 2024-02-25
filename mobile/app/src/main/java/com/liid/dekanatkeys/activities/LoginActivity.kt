@@ -1,23 +1,26 @@
-package com.liid.dekanatkeys
+package com.liid.dekanatkeys.activities
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import com.liid.dekanatkeys.R
 import com.liid.dekanatkeys.databinding.ActivityLoginBinding
 import com.liid.dekanatkeys.helpers.Log
+import com.liid.dekanatkeys.helpers.OKOApiSingleton
 import com.liid.dekanatkeys.helpers.OKOCallback
-import com.liid.dekanatkeys.models.LoginRequest
-import com.liid.dekanatkeys.models.LoginResponse
+import com.liid.dekanatkeys.models.user.LoginRequest
+import com.liid.dekanatkeys.models.user.LoginResponse
 import retrofit2.Call
 
-class LoginActivity: AppCompatActivityOKOApi() {
+class LoginActivity: AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
 
     private lateinit var email: String
     private lateinit var password: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        OKOApiSingleton.initialize(getString(R.string.Api))
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -36,16 +39,13 @@ class LoginActivity: AppCompatActivityOKOApi() {
         binding.loginButton.setOnClickListener {
             Log("$email $password")
             login(email, password)
-
-            val intent = Intent(this@LoginActivity, MainActivity::class.java)
-            startActivity(intent)
         }
     }
 
     private fun login(email:String, password:String){
         val loginRequest = LoginRequest(email, password)
 
-        val call: Call<LoginResponse> = okoapi.loginUser(loginRequest)
+        val call: Call<LoginResponse> = OKOApiSingleton.api.loginUser(loginRequest)
 
         call.enqueue(OKOCallback<LoginResponse>(
             successCallback = {response ->
@@ -53,6 +53,9 @@ class LoginActivity: AppCompatActivityOKOApi() {
                 if (token != null) {
                     Log(token)
                     saveToken(token)
+
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                    startActivity(intent)
                 }
                 else Log("null token")
             },
@@ -67,5 +70,6 @@ class LoginActivity: AppCompatActivityOKOApi() {
         val editor = preferences.edit()
         editor.putString(getString(R.string.jwtTokenName), token)
         editor.apply()
+        Log("token putted")
     }
 }
