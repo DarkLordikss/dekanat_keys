@@ -9,7 +9,6 @@ class Classroom_for_pair(BaseModel):
     classroom_id: UUID
     buildings: int
     class_number: int
-    status: int
 
 
 class Day(BaseModel):
