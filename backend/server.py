@@ -12,6 +12,8 @@ from routers.user_router import user_router
 
 from storage.storage_init import init_db
 
+from services.email_service import EmailService
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,5 +36,8 @@ app.add_middleware(
 )
 
 if __name__ == "__main__":
+    email_service = EmailService()
+    email_service.test_send()
+
     init_db()
     uvicorn.run(app, host="0.0.0.0", port=8000)
