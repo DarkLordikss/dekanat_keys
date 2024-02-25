@@ -1,3 +1,4 @@
+import json
 import logging
 from uuid import UUID
 
@@ -16,6 +17,8 @@ from models.dto.formatted_application_with_status_dto import FormattedTimetableW
 from models.dto.message_dto import MessageDTO
 from models.enum.userroles import UserRoles
 from models.tables.classroom import Classroom
+from models.tables.connected_user import ConnectedUser
+from models.tables.transfering_application import TransferingApplication
 from models.tables.user import User
 from storage.db_config import get_db
 
@@ -26,6 +29,7 @@ from services.application_service import ApplicationService
 from services.entity_verifier_service import EntityVerifierService
 
 import config
+from websockets_for_notifications.notification_websocket import client_sockets
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -379,10 +383,9 @@ async def change_application_status(
 
 @application_router.post(
     "/transfer_key/",
-    response_model=FormattedTimetableWithStatus,
     responses={
         200: {
-            "model": FormattedTimetableWithStatus
+            "model": "SUPER GUT"
         },
         404: {
             "model": ErrorDTO
@@ -412,8 +415,31 @@ async def transfer_key(
             raise HTTPException(status_code=403, detail="Token revoked")
 
         token_data = auth_service.get_data_from_access_token(access_token)
-        user_owner = await user_service.get_user_by_id(db, (await token_data)["sub"])
+        user_sender = await user_service.get_user_by_id(db, (await token_data)["sub"])
 
+        if not user_service.check_user_existence(db, user_recipient_id):
+            raise HTTPException(status_code=404, detail=f"Recipient user with id = {user_recipient_id} isn't exists")
+
+        if not application_service.check_application_existence(db, user_sender, application_id):
+            raise HTTPException(status_code=404, detail=f"Recipient user with id = {user_recipient_id} isn't exists")
+
+        recipient = db.query(ConnectedUser).filter(ConnectedUser.id == user_recipient_id).first()
+
+        message_data = TransferingApplication(
+            application_id=application_id,
+            user_recipient_id=user_recipient_id,
+            user_sender_id=user_sender.id
+        )
+
+        if recipient:
+            websocket_id = recipient.websocket_id
+            websocket = [conn for conn in client_sockets if id(conn) == websocket_id][0]
+
+            message_json = json.dumps(message_data)
+            await websocket.send_text(message_json)
+        else:
+            db.add(message_data)
+            db.commit()
 
     except HTTPException:
         raise
@@ -422,48 +448,12 @@ async def transfer_key(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@application_router.websocket(
-    "/confirm_transfering_key/",
-)
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Message text was: {data}")
-
-
-clients = []
-
-
-@application_router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    clients.append(websocket)
-
-    try:
-        while True:
-            # Получаем сообщение от клиента
-            data = await websocket.receive_text()
-            print(f"Received message: {data}")
-
-            # Рассылаем сообщение всем подключенным клиентам
-            for client in clients:
-                await client.send_text(data)
-    except Exception as e:
-        print(f"WebSocket connection error: {e}")
-        clients.remove(websocket)
-
-
+"""
 @application_router.post("/send_notification/")
 async def send_notification(message: str):
     # Рассылка уведомления всем клиентам
-    for client in clients:
+    for client in client_sockets:
         await client.send_text(message)
     return {"message": "Notification sent successfully"}
 
-@application_router.post("/send_notification/")
-async def send_notification(message: str):
-    # Рассылка уведомления всем клиентам
-    for client in clients:
-        await client.send_text(message)
-    return {"message": "Notification sent successfully"}
+"""

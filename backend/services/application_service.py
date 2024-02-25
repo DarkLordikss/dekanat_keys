@@ -56,6 +56,26 @@ class ApplicationService:
             self.logger.error(f"(async def create_application) Error: {e}")
             raise
 
+    async def check_application_existence(
+            self,
+            user_id: str,
+            application_id,
+            db: Session
+    ) -> bool:
+        try:
+            application = db.query(Application).filter(and_(Application.id == application_id, Application.user_id == user_id)).first()
+
+            if application:
+                self.logger.info(f"(Checking Application existence) Got application with ID: {application.id}")
+                return True
+            else:
+                self.logger.warning(f"(Checking Application existence) No same application found: {application_id}")
+                return False
+
+        except Exception as e:
+            self.logger.error(f"(Checking user Application existence) Error: {e}")
+            raise
+
     async def time_table_id_validate(self, db: Session, time_table_id: int):
         try:
             classroom = db.query(Timeslot).filter(Timeslot.id == time_table_id).first()
