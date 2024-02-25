@@ -12,6 +12,7 @@ from typing import List
 from models.dto.application_create_dto import ApplicationCreateDTO
 from models.dto.available_classrooms_dto import AvailableClassroomsShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
+from models.dto.formatted_application_with_status_dto import PairWithStatus
 from models.dto.formatted_available_classrooms_dto import Classroom_for_pair
 from models.enum.applicationstatuses import ApplicationStatuses
 from models.enum.userroles import UserRoles
@@ -241,7 +242,7 @@ class ApplicationService:
         formatted_timetable = {}
 
         for classroom in result_applications:
-            pair = Classroom_for_pair(
+            pair = PairWithStatus(
                 classroom_id=classroom.id,
                 status=classroom.application_status_id,
                 name=classroom.name,
