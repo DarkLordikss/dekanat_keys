@@ -139,7 +139,7 @@ async def verify(key: str,
 
         logger.info(f"(Verify) User verified registered: {user.id}")
 
-        return MessageDTO(message=str(user.id))
+        return MessageDTO(message='Account verified!')
     except HTTPException:
         raise
     except Exception as e:
