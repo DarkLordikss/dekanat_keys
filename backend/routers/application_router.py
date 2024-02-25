@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 from datetime import timedelta, date
 
 from models.dto.application_create_dto import ApplicationCreateDTO
-
-from models.dto.application_showing_dto import AvailableClassroomsShowingDTO
+from models.dto.application_showing_dto import ApplicationShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
 from models.dto.error_dto import ErrorDTO
+from models.dto.formatted_application_dto import FormattedTimetable, Day
 from models.dto.formatted_application_with_status_dto import FormattedTimetableWithStatus, DayWithStatus
 from models.dto.message_dto import MessageDTO
 from models.enum.userroles import UserRoles
@@ -135,6 +135,101 @@ async def create_application(
 
 
 @application_router.get(
+    "/show/",
+    response_model=FormattedTimetable,
+    responses={
+        200: {
+            "model": FormattedTimetable
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def show_applications(
+        building: int,
+        start_date: date,
+        end_date: date = None,
+        scheduled: bool = True,
+        classrooms: list[int] = Query(),
+        user_id: UUID = None,
+        db: Session = Depends(get_db),
+        application_service: ApplicationService = Depends(ApplicationService),
+        classroom_service: ClassroomService = Depends(ClassroomService),
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
+):
+    try:
+        if not end_date:
+            end_date = start_date
+
+        timetables = []
+        schedule = []
+        current_date = start_date
+
+        if await entity_verifier_service.check_correct_dates(start_date, end_date):
+            raise HTTPException(status_code=400, detail="invalid date")
+
+        if await entity_verifier_service.check_existence(
+            db,
+            Classroom,
+            Classroom.building == building,
+            f"(Check building existence) building with number {building} exists",
+            f"(Check building existence) building with number {building} not found",
+            building_number=building
+        ):
+            raise HTTPException(status_code=404, detail="building not found")
+
+        if await classroom_service.check_correct_classrooms(db, classrooms, building):
+            raise HTTPException(status_code=404, detail="Classrooms not found")
+
+        if await entity_verifier_service.check_existence(
+                db,
+                User,
+                User.id == user_id,
+                f"(Check user existence) user with id {user_id} exists",
+                f"(Check user existence) user with id {user_id} not found",
+                user_id_func=user_id
+        ) and user_id is not None:
+            raise HTTPException(status_code=404, detail="user not found")
+
+        while current_date <= end_date:
+            application_showing_dto = ApplicationShowingDTO(
+                building=building,
+                classrooms=classrooms,
+                scheduled=scheduled,
+                user_id=user_id,
+                date=current_date
+            )
+
+            timetables.append(application_service.show_applications(db, application_showing_dto))
+
+            daily_applications = Day(
+                date=current_date,
+                timetable={}
+            )
+
+            schedule.append(daily_applications)
+            current_date += timedelta(days=1)
+
+        for index in range(len(schedule)):
+            schedule[index].timetable = await timetables[index]
+
+        return FormattedTimetable(schedule=schedule)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Application) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@application_router.get(
     "/show_with_status/",
     response_model=FormattedTimetableWithStatus,
     responses={
@@ -210,8 +305,7 @@ async def show_applications_with_status(
                 date=current_date
             )
 
-            timetables.append(application_service.show_applications_with_status(db,
-                                                                                application_showing_with_status_dto))
+            timetables.append(application_service.show_applications_with_status(db, application_showing_with_status_dto))
 
             daily_applications = DayWithStatus(
                 date=current_date,

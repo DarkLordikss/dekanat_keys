@@ -243,13 +243,12 @@ class ApplicationService:
         for classroom in result_applications:
             pair = Classroom_for_pair(
                 classroom_id=classroom.id,
-                status=classroom[4],
+                status=classroom.application_status_id,
                 name=classroom.name,
                 description=classroom.description,
                 buildings=classroom[0].building,
                 class_number=classroom[0].number
             )
-            print(pair)
             pair_number = classroom.time_table_id
 
             if pair_number in formatted_timetable:
