@@ -97,7 +97,7 @@ class TimetablePage extends React.Component {
     
 
     if (targetClasses.contains('classroom-button')) {
-      if (this.state.choosenRooms > 1) {
+      if (this.state.choosenRooms.length > 1) {
         for (let i = 0; i < this.state.choosenRooms.length; i++) {
           let room = this.state.choosenRooms[i];
           if (room.id === targetId) {
