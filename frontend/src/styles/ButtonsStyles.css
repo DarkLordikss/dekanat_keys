@@ -27,8 +27,8 @@
 }
 
 .button-good {
-    background-color: var(--button-);
-    color: var(--text-alt-color);
+    background-color: var(--button-good);
+    color: var(--text-default-color);
     transition: 0.2s;
 }
 .button-good:hover {
@@ -41,7 +41,7 @@
 }
 
 .button-warning {
-    background-color: var(--button-);
+    background-color: var(--button-warning);
     color: var(--text-alt-color);
     transition: 0.2s;
 }
@@ -55,7 +55,7 @@
 }
 
 .button-gifted {
-    background-color: var(--button-);
+    background-color: var(--button-gifted);
     color: var(--text-alt-color);
     transition: 0.2s;
 }
