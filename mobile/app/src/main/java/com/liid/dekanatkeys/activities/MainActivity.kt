@@ -2,13 +2,7 @@ package com.liid.dekanatkeys.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.liid.dekanatkeys.R
 import com.liid.dekanatkeys.databinding.ActivityMainBinding
-import com.liid.dekanatkeys.helpers.Log
-import com.liid.dekanatkeys.helpers.OKOApiSingleton
-import com.liid.dekanatkeys.helpers.OKOCallback
-import com.liid.dekanatkeys.models.user.UserProfile
-import retrofit2.Call
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding

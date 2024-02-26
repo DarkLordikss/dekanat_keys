@@ -6,13 +6,11 @@ import android.content.Intent
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat.startActivity
 import com.liid.dekanatkeys.R
 import com.liid.dekanatkeys.activities.LoginActivity
-import com.liid.dekanatkeys.activities.MainActivity
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
 import com.liid.dekanatkeys.helpers.OKOCallback

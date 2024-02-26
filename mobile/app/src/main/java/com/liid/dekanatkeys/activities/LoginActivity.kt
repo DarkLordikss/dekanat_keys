@@ -2,6 +2,7 @@ package com.liid.dekanatkeys.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.liid.dekanatkeys.R
@@ -39,6 +40,11 @@ class LoginActivity: AppCompatActivity() {
         binding.loginButton.setOnClickListener {
             Log("$email $password")
             login(email, password)
+        }
+
+        binding.registerButton.setOnClickListener{
+            val intent = Intent(this@LoginActivity, RegistrationActivity::class.java)
+            startActivity(intent)
         }
     }
 
