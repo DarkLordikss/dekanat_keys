@@ -57,7 +57,7 @@ export async function user(token) {
     }
 }
 
-export async function getTimetable(token, building = 2, start_date = null, end_date = null, classrooms = [229, 402], statuses = [1, 2, 3, 4, 5], user_id = null) {
+export async function getTimetable(token, start_date = null, end_date = null, building = 2, classrooms = [402], statuses = [1, 2, 3, 4, 5], user_id = null) {
     const params = new URLSearchParams();
     params.append('building', building);
     params.append('start_date', start_date);
@@ -113,4 +113,31 @@ export async function checkAuth() {
         return true;
     }
     return false;
+}
+
+export async function getRooms() {
+    try {
+        const response = await fetch(`${default_way}classroom/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        
+
+        if (!response.ok) {
+            if (response.status === 400) {
+                alert('Произошла ошибка!\nПроверьте правильность заполнения полей')
+            }
+            else if (response.status === 500) {
+                alert('Произошла ошибка!\nОшибка на сервере!')
+            }
+            return null;
+        }
+        const data = await response.json();
+        
+        return data;
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
 }

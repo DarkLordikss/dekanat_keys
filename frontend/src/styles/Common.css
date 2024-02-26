@@ -5,7 +5,7 @@
 
 :root {
     --back-color : rgb(255, 255, 255);
-    --box-color : rgb(218, 218, 218);
+    --box-color : rgb(235, 235, 235);
     --borders-color: rgb(143, 143, 143);
     --text-dark-color : rgb(0, 0, 0);
     --text-default-color : rgb(20, 20, 20);
@@ -42,16 +42,35 @@ input {
     min-height: 40px;
     background-color: var(--back-color);
     border: 0;
-    border-bottom: 1px solid rgb(100, 100, 100);
-    box-shadow: 0px 3px 0px -5px rgb(100, 100, 100);
+    border: 1px solid var(--borders-color);
+    box-shadow: 0px 3px 0px -5px var(--borders-color);
     outline: none;
     transition: 0.1s;
+    border-radius: 3px;
 }
 input:focus {
     outline: none;
-    box-shadow: 0px 3px 6px -3px rgb(100, 100, 100);
+    box-shadow: 0px 3px 6px -3px var(--borders-color);
 }
 input:active {
+    outline: none;
+}
+
+select {
+    min-height: 40px;
+    background-color: var(--back-color);
+    border: 0;
+    border: 1px solid var(--borders-color);
+    box-shadow: 0px 3px 0px -5px var(--borders-color);
+    outline: none;
+    transition: 0.1s;
+    border-radius: 3px;
+}
+select:focus {
+    outline: none;
+    box-shadow: 0px 3px 6px -3px var(--borders-color);
+}
+select:active {
     outline: none;
 }
 
@@ -102,22 +121,33 @@ input:active {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    min-width: 300px;
+    min-width: 250px;
     max-width: 1000px;
 }
 .smaller-object {
-    min-width: 200px;
+    min-width: 180px;
 }
 .nullable-object {
     min-width: 0;
 }
+.maxable-object {
+    max-width: none;
+}
 .scrollable-object {
     overflow-y: scroll;
+}
+.auditory-object {
+    border-radius: 100px;
+    vertical-align: top;
 }
 
 .raw-box {
     border-radius: 3px;
     background-color: var(--box-color);
+}
+.box-borders {
+    border: 1px solid var(--borders-color);
+    border-radius: 3px;
 }
 
 .filling-box {
