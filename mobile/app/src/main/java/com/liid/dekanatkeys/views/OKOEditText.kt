@@ -13,6 +13,24 @@ class OKOEditText (context: Context, attrs: AttributeSet?) : AppCompatEditText(c
     private val extraPadding = 20
     private var strokeWidth = 3
     private var strokeColor = context.getColor(R.color.gray)
+    private var errorStrokeColor = context.getColor(R.color.red)
+
+    public fun setErrorColor(){
+        background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+            setColor(Color.argb(0,0,0,0))
+            setStroke(strokeWidth, errorStrokeColor)
+        }
+    }
+    public fun setColor(){
+        background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+            setColor(Color.argb(0,0,0,0))
+            setStroke(strokeWidth, strokeColor)
+        }
+    }
 
     init {
         background = GradientDrawable().apply {
