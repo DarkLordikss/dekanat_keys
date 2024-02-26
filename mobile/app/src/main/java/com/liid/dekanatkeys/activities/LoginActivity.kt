@@ -10,9 +10,17 @@ import com.liid.dekanatkeys.databinding.ActivityLoginBinding
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
 import com.liid.dekanatkeys.helpers.OKOCallback
+import com.liid.dekanatkeys.models.ApiService
+import com.liid.dekanatkeys.models.WebSocket
 import com.liid.dekanatkeys.models.user.LoginRequest
 import com.liid.dekanatkeys.models.user.LoginResponse
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocketListener
 import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginActivity: AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
