@@ -4,6 +4,7 @@ from fastapi import HTTPException, Depends, APIRouter
 
 import jwt
 
+import config
 from models.dto.message_dto import MessageDTO
 from services.email_service import EmailService
 from storage.db_config import get_db
@@ -28,6 +29,7 @@ user_router = APIRouter(prefix="/user")
 
 @user_router.post(
     "/login/",
+    tags=[config.SWAGGER_GROUPS["user"]],
     response_model=UserAccessTokenDTO,
     responses={
         200: {
@@ -69,6 +71,7 @@ async def login(user_login_dto: UserLoginDTO,
 
 @user_router.post(
     "/register/",
+    tags=[config.SWAGGER_GROUPS["user"]],
     response_model=MessageDTO,
     responses={
         200: {
@@ -110,6 +113,7 @@ async def register(user_reg_dto: UserRegDTO,
 
 @user_router.get(
     "/verify/{key}",
+    tags=[config.SWAGGER_GROUPS["user"]],
     response_model=MessageDTO,
     responses={
         200: {
@@ -149,6 +153,7 @@ async def verify(key: str,
 
 @user_router.get(
     "/",
+    tags=[config.SWAGGER_GROUPS["user"]],
     response_model=UserProfileDTO,
     responses={
         200: {
@@ -199,6 +204,7 @@ async def get_profile(access_token: str = Depends(oauth2_scheme),
 
 @user_router.post(
     "/logout/",
+    tags=[config.SWAGGER_GROUPS["user"]],
     response_model=MessageDTO,
     responses={
         200: {

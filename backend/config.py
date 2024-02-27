@@ -199,3 +199,11 @@ p, ul, ol {
 TEST_MESSAGE['From'] = os.environ['EMAIL_LOGIN']
 TEST_MESSAGE['To'] = os.environ['EMAIL_TEST']
 TEST_MESSAGE['Subject'] = 'Test message'
+
+SWAGGER_GROUPS = {
+    "classroom": "Classroom",
+    "test": "Test",
+    "application": "Application",
+    "building": "Building",
+    "user": "User",
+}

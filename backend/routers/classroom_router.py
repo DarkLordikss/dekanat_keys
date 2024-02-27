@@ -3,6 +3,7 @@ import logging
 from fastapi import HTTPException, Depends, APIRouter
 from requests import Session
 
+import config
 from models.dto.classroom_dto import ClassroomDTO
 from models.dto.classrooms_dto import ClassroomsDTO
 from models.dto.error_dto import ErrorDTO
@@ -17,7 +18,8 @@ classroom_router = APIRouter(prefix="/classroom")
 
 
 @classroom_router.get(
-    "/",
+    "/all",
+    tags=[config.SWAGGER_GROUPS["classroom"]],
     response_model=ClassroomsDTO,
     responses={
         200: {
