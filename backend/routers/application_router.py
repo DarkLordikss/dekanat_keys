@@ -1,9 +1,10 @@
+import json
 import logging
 from uuid import UUID
 
 import jwt
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, WebSocket
 from sqlalchemy.orm import Session
 from datetime import timedelta, date
 
@@ -16,6 +17,8 @@ from models.dto.formatted_application_with_status_dto import FormattedTimetableW
 from models.dto.message_dto import MessageDTO
 from models.enum.userroles import UserRoles
 from models.tables.classroom import Classroom
+from models.tables.connected_user import ConnectedUser
+from models.tables.transfering_application import TransferingApplication
 from models.tables.user import User
 from storage.db_config import get_db
 
@@ -26,6 +29,7 @@ from services.application_service import ApplicationService
 from services.entity_verifier_service import EntityVerifierService
 
 import config
+from websockets_for_notifications.notification_websocket import client_sockets
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -76,12 +80,12 @@ async def create_application(
             raise HTTPException(status_code=404, detail="Classroom not found")
         """""
         if await entity_verifier_service.check_existence(
-            db,
-            Classroom,
-            Classroom.id == application_create_dto.classroom_id,
-            f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} exists",
-            f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} not found",
-            classroom_id=application_create_dto.classroom_id
+                db,
+                Classroom,
+                Classroom.id == application_create_dto.classroom_id,
+                f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} exists",
+                f"(Check Classroom existence) Classroom with id {application_create_dto.classroom_id} not found",
+                classroom_id=application_create_dto.classroom_id
         ):
             raise HTTPException(status_code=404, detail="building not found")
 
@@ -133,7 +137,6 @@ async def create_application(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-
 @application_router.get(
     "/show_available_classrooms/",
     response_model=FormattedTimetable,
@@ -174,12 +177,12 @@ async def show_available_classrooms(
             raise HTTPException(status_code=400, detail="invalid date")
 
         if await entity_verifier_service.check_existence(
-            db,
-            Classroom,
-            Classroom.building == building,
-            f"(Check building existence) building with number {building} exists",
-            f"(Check building existence) building with number {building} not found",
-            building_number=building
+                db,
+                Classroom,
+                Classroom.building == building,
+                f"(Check building existence) building with number {building} exists",
+                f"(Check building existence) building with number {building} not found",
+                building_number=building
         ):
             raise HTTPException(status_code=404, detail="building not found")
 
@@ -260,12 +263,12 @@ async def show_applications_with_status(
             raise HTTPException(status_code=400, detail="invalid date")
 
         if await entity_verifier_service.check_existence(
-            db,
-            Classroom,
-            Classroom.building == building,
-            f"(Check building existence) building with number {building} exists",
-            f"(Check building existence) building with number {building} not found",
-            building_number=building
+                db,
+                Classroom,
+                Classroom.building == building,
+                f"(Check building existence) building with number {building} exists",
+                f"(Check building existence) building with number {building} not found",
+                building_number=building
         ):
             raise HTTPException(status_code=404, detail="building not found")
 
@@ -291,7 +294,9 @@ async def show_applications_with_status(
                 date=current_date
             )
 
-            timetables.append(application_service.show_applications_with_status(db, application_showing_with_status_dto))
+            timetables.append(
+                application_service.show_applications_with_status(db, application_showing_with_status_dto
+                                                                  ))
 
             daily_applications = DayWithStatus(
                 date=current_date,
@@ -371,6 +376,85 @@ async def change_application_status(
     except KeyError:
         logger.warning(f"(Change deal status) Wrong new status for application {application_id}")
         raise HTTPException(status_code=400, detail="Wrong status")
+    except Exception as e:
+        logger.error(f"(Change deal status) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@application_router.post(
+    "/transfer_key/",
+    responses={
+        200: {
+            "model": MessageDTO
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def transfer_key(
+        application_id: str,
+        user_recipient_id: str,
+        access_token: str = Depends(config.oauth2_scheme),
+        db: Session = Depends(get_db),
+        user_service: UserService = Depends(UserService),
+        auth_service: AuthService = Depends(AuthService),
+        application_service: ApplicationService = Depends(ApplicationService),
+        classroom_service: ClassroomService = Depends(ClassroomService),
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
+):
+    try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Change deal status) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+
+        token_data = auth_service.get_data_from_access_token(access_token)
+        user_sender = await user_service.get_user_by_id(db, (await token_data)["sub"])
+
+        # if not await user_service.check_user_existence(db, user_recipient_id):
+        #     raise HTTPException(status_code=404, detail=f"Recipient user with id = {user_recipient_id} isn't exists")
+        #
+        # if not await application_service.check_application_existence(db, user_sender, application_id):
+        #     raise HTTPException(status_code=404, detail=f"Recipient user with id = {user_recipient_id} isn't exists")
+
+        recipient = db.query(ConnectedUser).filter(ConnectedUser.id == user_recipient_id).first()
+
+        message_data = TransferingApplication(
+            application_id=application_id,
+            user_recipient_id=user_recipient_id,
+            user_sender_id=user_sender.id
+        )
+
+        if recipient:
+            client_socket = db.query(ConnectedUser).filter(ConnectedUser.id == user_recipient_id).first()
+            print(client_socket)
+            #websocket = client_socket.websocket_id
+            websocket = client_sockets[user_recipient_id]
+            #message_json = json.dumps(message_data)
+            await websocket.send_json(message_data.__json__())
+        else:
+            db.add(message_data)
+            db.commit()
+
+    except HTTPException:
+        raise
     # except Exception as e:
-    #     logger.error(f"(Change deal status) Error: {e}")
+    #     logger.error(f"(Application) Error: {e}")
     #     raise HTTPException(status_code=500, detail="Internal server error")
+
+
+"""
+@application_router.post("/send_notification/")
+async def send_notification(message: str):
+    # Рассылка уведомления всем клиентам
+    for client in client_sockets:
+        await client.send_text(message)
+    return {"message": "Notification sent successfully"}
+
+"""

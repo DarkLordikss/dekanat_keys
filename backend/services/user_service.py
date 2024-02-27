@@ -120,3 +120,18 @@ class UserService:
         except Exception as e:
             self.logger.error(f"(Password verify) Error: {e}")
             raise
+
+    async def check_user_existence(self, db: Session, user_id: str) -> bool:
+        try:
+            user = db.query(User).filter((User.id == user_id) & User.is_verified).first()
+
+            if user:
+                self.logger.info(f"(Checking user existence) Got user with ID: {user.id}")
+                return True
+            else:
+                self.logger.warning(f"(Checking user existence) No same user found: {user_id}")
+                return False
+
+        except Exception as e:
+            self.logger.error(f"(Checking user existence) Error: {e}")
+            raise

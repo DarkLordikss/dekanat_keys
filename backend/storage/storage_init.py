@@ -1,5 +1,7 @@
 import logging
 
+from models.tables.connected_user import ConnectedUser
+from models.tables.transfering_application import TransferingApplication
 from storage.db_config import SessionLocal, Base, engine
 
 from models.tables.user import User
@@ -19,6 +21,8 @@ def init_db():
 
     try:
         Base.metadata.create_all(bind=engine, tables=[User.__table__,
+                                                      ConnectedUser.__table__,
+                                                      TransferingApplication.__table__,
                                                       Application.__table__,
                                                       Classroom.__table__,
                                                       ConfirmStatus.__table__,
