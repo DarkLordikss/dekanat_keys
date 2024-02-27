@@ -16,11 +16,13 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".activities.SuccessRegistrationActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.RegistrationActivity"
             android:exported="false"
             android:label="@string/title_activity_registration"
             android:theme="@style/Theme.DekanatKeys" />
-
         <activity
             android:name=".activities.LoginActivity"
             android:exported="true">
