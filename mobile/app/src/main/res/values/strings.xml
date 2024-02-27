@@ -20,5 +20,11 @@
     <string name="Api">"https://zomnbi-mozgi-kushat-iii-backend.pmc-python.ru/api/v1/"</string>
     <string name="LogTag">"OKOTag"</string>
     <string name="title_activity_registration">RegistrationActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <string name="bottom_navigation_views">Bottom Navigation</string>
 
 </resources>

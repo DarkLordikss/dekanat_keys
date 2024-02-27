@@ -2,8 +2,15 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.DekanatKeys" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <item name="colorPrimary">@color/white</item>
-    </style>
+        <item name="colorPrimary">@color/lavender</item>
+        <item name="colorPrimaryVariant">@color/lavender</item>
 
+    </style>
+    
+    <style name="SlideActivityAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+    </style>
+    
     <style name="Theme.DekanatKeys" parent="Base.Theme.DekanatKeys" />
 </resources>

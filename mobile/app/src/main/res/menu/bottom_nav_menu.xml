@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/bottom_account_circle"
+        android:icon="@drawable/baseline_account_circle_24"
+        android:title="Профиль"/>
+
+    <item
+        android:id="@+id/bottom_calender_view"
+        android:icon="@drawable/baseline_calendar_view_day_24"
+        android:title="Расписание"/>
+
+    <item
+        android:id="@+id/bottom_check_circle"
+        android:icon="@drawable/baseline_check_circle_24"
+        android:title="Мои заявки"/>
+
+    <item
+        android:id="@+id/bottom_key"
+        android:icon="@drawable/baseline_key_24"
+        android:title="Ключ"/>
+
+</menu>
