@@ -10,8 +10,11 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
 
+    <string name="success_registration_message">"Регистрация прошла успешно"</string>
+    <string name="success_registration_message_details">"Перейдите по ссылке из письма, отправленного на вашу почту, а после войдите в аккаунт"</string>
+
     <string name="email_error_message">"Не является email"</string>
-    <string name="password_error_message">"Пароль должен быть длиной не менее 6 символов и состоять из букв и цифр"</string>
+    <string name="password_error_message">"Пароль должен быть длиной не менее 6 символов"</string>
     <string name="name_error_message">"ФИО должно быть от 3 до 30 символов"</string>
 
     <string name="action_sign_in">"Войти"</string>
