@@ -5,6 +5,7 @@ from fastapi import HTTPException, Depends, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from requests import Session
 
+import config
 from models.dto.error_dto import ErrorDTO
 from models.dto.user_access_token_dto import UserAccessTokenDTO
 
@@ -20,6 +21,7 @@ test_router = APIRouter(prefix="/test")
 
 @test_router.post(
     "/login/",
+    tags=[config.SWAGGER_GROUPS["test"]],
     response_model=UserAccessTokenDTO,
     responses={
         200: {

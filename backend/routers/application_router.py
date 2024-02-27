@@ -39,6 +39,7 @@ application_router = APIRouter(prefix="/applications")
 
 @application_router.post(
     "/create/",
+    tags=[config.SWAGGER_GROUPS["application"]],
     response_model=MessageDTO,
     responses={
         200: {
@@ -139,6 +140,7 @@ async def create_application(
 
 @application_router.get(
     "/show_available_classrooms/",
+    tags=[config.SWAGGER_GROUPS["application"]],
     response_model=FormattedTimetable,
     responses={
         200: {
@@ -220,6 +222,7 @@ async def show_available_classrooms(
 
 @application_router.get(
     "/show_with_status/",
+    tags=[config.SWAGGER_GROUPS["application"]],
     response_model=FormattedTimetableWithStatus,
     responses={
         200: {
@@ -320,6 +323,7 @@ async def show_applications_with_status(
 
 @application_router.post(
     "/change_deal_status/{application_id}",
+    tags=[config.SWAGGER_GROUPS["application"]],
     response_model=MessageDTO,
     responses={
         200: {
@@ -383,6 +387,7 @@ async def change_application_status(
 
 @application_router.post(
     "/transfer_key/",
+    tags=[config.SWAGGER_GROUPS["application"]],
     responses={
         200: {
             "model": MessageDTO

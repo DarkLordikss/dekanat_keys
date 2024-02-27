@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 
+import config
 from models.dto.building_classrooms_dto import BuildingClassroomsDTO
 from models.dto.building_dto import BuildingDTO
 from models.dto.error_dto import ErrorDTO
@@ -18,6 +19,7 @@ building_router = APIRouter(prefix="/building")
 
 @building_router.get(
     "/get-all-buildings",
+    tags=[config.SWAGGER_GROUPS["building"]],
     response_model=BuildingDTO,
     responses={
         200: {
@@ -45,6 +47,7 @@ async def get_buildings(db: Session = Depends(get_db),
 
 @building_router.get(
     "/get-classrooms-from-building",
+    tags=[config.SWAGGER_GROUPS["building"]],
     response_model=BuildingClassroomsDTO,
     responses={
         200: {
