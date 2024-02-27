@@ -11,7 +11,7 @@ from services.websocket_service import WebsocketService
 from storage.db_config import get_db
 
 import config
-client_sockets: List[WebSocket] = []
+client_sockets = {}
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,23 +55,31 @@ async def websocket_endpoint(
         websocket_service: WebsocketService = Depends(WebsocketService)
 ):
     await websocket.accept()
+    logger.info(f"PISYA POPA KAKA")
+    client_sockets[user_id] = websocket
+    db_user = ConnectedUser(id=user_id, websocket_id=id(websocket))
+    db.add(db_user)
+    db.commit()
     try:
-        db_user = ConnectedUser(user_id=user_id, websocket_id=id(websocket))
-        db.add(db_user)
-        db.commit()
+
 
         while True:
-            data_json = await websocket.receive_text()
-            data = json.loads(data_json)
+            print("GGGGGGGGGGGGGGGGGAAAAAAAAAAAAAAAAAAAAGGGGGGGG")
+            data = await websocket.receive_text()
+            #data = json.loads(data_json)
+            print("GGGGGGGGGGGGGGGGGGGGGGGGG", data)
 
-            user_recipient_id = data["recipient_id"]
-            application_id = data["application_id"]
-            answer = data["answer"]
+            # user_recipient_id = data["recipient_id"]
+            # application_id = data["application_id"]
+            # answer = data["answer"]
+            application_id, user_recipient_id, user_sender_id, answer_str = data.split(":")
+            answer = bool(answer_str)
+            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAa   ", application_id, user_recipient_id, user_sender_id, answer)
 
-            await websocket_service.change_application_owner(db, user_id, user_recipient_id, application_id, answer)
+            if data : await websocket_service.change_application_owner(db, user_id, user_recipient_id, application_id, answer)
     except WebSocketDisconnect:
         # Удаляем запись из базы данных при отключении пользователя
-        db.query(ConnectedUser).filter(ConnectedUser.user_id == user_id).delete()
+        db.query(ConnectedUser).filter(ConnectedUser.id == user_id).delete()
         db.commit()
 
 

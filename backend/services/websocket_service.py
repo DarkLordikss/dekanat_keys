@@ -10,11 +10,12 @@ from typing import List
 from models.tables.application import Application
 from models.tables.connected_user import ConnectedUser
 from models.tables.transfering_application import TransferingApplication
-from websockets_for_notifications.notification_websocket import client_sockets
+#from websockets_for_notifications.notification_websocket import client_sockets
 
 
 class WebsocketService:
     async def change_application_owner(
+            self,
             db: Session,
             user_owner_id: str,
             user_recipient_id: str,
@@ -33,7 +34,7 @@ class WebsocketService:
             .query(TransferingApplication) \
             .filter(and_(
                 TransferingApplication.application_id == application_id,
-                TransferingApplication.user_owner_id == user_owner_id,
+                TransferingApplication.user_sender_id == user_owner_id,
                 TransferingApplication.user_recipient_id == user_recipient_id)
             ) \
             .delete()

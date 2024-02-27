@@ -385,7 +385,7 @@ async def change_application_status(
     "/transfer_key/",
     responses={
         200: {
-            "model": "SUPER GUT"
+            "model": MessageDTO
         },
         404: {
             "model": ErrorDTO
@@ -399,8 +399,8 @@ async def change_application_status(
     }
 )
 async def transfer_key(
-        application_id: UUID,
-        user_recipient_id: UUID,
+        application_id: str,
+        user_recipient_id: str,
         access_token: str = Depends(config.oauth2_scheme),
         db: Session = Depends(get_db),
         user_service: UserService = Depends(UserService),
@@ -417,11 +417,11 @@ async def transfer_key(
         token_data = auth_service.get_data_from_access_token(access_token)
         user_sender = await user_service.get_user_by_id(db, (await token_data)["sub"])
 
-        if not user_service.check_user_existence(db, user_recipient_id):
-            raise HTTPException(status_code=404, detail=f"Recipient user with id = {user_recipient_id} isn't exists")
-
-        if not application_service.check_application_existence(db, user_sender, application_id):
-            raise HTTPException(status_code=404, detail=f"Recipient user with id = {user_recipient_id} isn't exists")
+        # if not await user_service.check_user_existence(db, user_recipient_id):
+        #     raise HTTPException(status_code=404, detail=f"Recipient user with id = {user_recipient_id} isn't exists")
+        #
+        # if not await application_service.check_application_existence(db, user_sender, application_id):
+        #     raise HTTPException(status_code=404, detail=f"Recipient user with id = {user_recipient_id} isn't exists")
 
         recipient = db.query(ConnectedUser).filter(ConnectedUser.id == user_recipient_id).first()
 
@@ -432,20 +432,21 @@ async def transfer_key(
         )
 
         if recipient:
-            websocket_id = recipient.websocket_id
-            websocket = [conn for conn in client_sockets if id(conn) == websocket_id][0]
-
-            message_json = json.dumps(message_data)
-            await websocket.send_text(message_json)
+            client_socket = db.query(ConnectedUser).filter(ConnectedUser.id == user_recipient_id).first()
+            print(client_socket)
+            #websocket = client_socket.websocket_id
+            websocket = client_sockets[user_recipient_id]
+            #message_json = json.dumps(message_data)
+            await websocket.send_json(message_data.__json__())
         else:
             db.add(message_data)
             db.commit()
 
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"(Application) Error: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    # except Exception as e:
+    #     logger.error(f"(Application) Error: {e}")
+    #     raise HTTPException(status_code=500, detail="Internal server error")
 
 
 """

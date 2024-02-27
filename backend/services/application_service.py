@@ -58,9 +58,9 @@ class ApplicationService:
 
     async def check_application_existence(
             self,
-            user_id: str,
-            application_id,
-            db: Session
+            db: Session,
+            application_id: str,
+            user_id: str
     ) -> bool:
         try:
             application = db.query(Application).filter(and_(Application.id == application_id, Application.user_id == user_id)).first()
