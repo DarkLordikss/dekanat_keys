@@ -4,7 +4,7 @@ import './styles/ObjectsWidth.css';
 import './styles/SpacingStyles.css';
 import './styles/TextStyles.css';
 import './styles/ButtonsStyles.css';
-import { checkAuth, getTimetable, getRooms } from "./Connector.js";
+import { checkAuth, getTimetable, getRooms, getBuildings, getRoomsFromBuilding } from "./Connector.js";
 import { getStatusString, parseDate, getBarriers, parseSmallDate, getStatusStyle} from "./Parsers.js";
 
 class TimetablePage extends React.Component {
@@ -12,6 +12,7 @@ class TimetablePage extends React.Component {
     super();
     this.state = {
       scheduleSet: false,
+      buildings: [],
       classRooms: [],
       choosenRooms: [],
       weekDistance: 0
@@ -20,44 +21,56 @@ class TimetablePage extends React.Component {
 
   async componentDidMount() {
     document.addEventListener('click', this.handleClick);
-
-    document.getElementById('add_classroom').addEventListener('change', this.addChooseRoom);
+    document.getElementById('building_field').addEventListener('change', this.handleBuildingChange);
 
     let authorized = checkAuth();
     if (!authorized) {
         window.location.href = '/';
     }
 
-    let rooms = (await getRooms()).classrooms;
-    console.log(rooms);
+    let buildings = (await getBuildings()).buildings;
+    for (let i = 0; i < buildings.length; i++) {
+      let build = buildings[i]
+      this.state.buildings.push(build);
+      document.getElementById('building_field').innerHTML += `<option id='chooseBuilding_${build}' value='${build}'>${build}</option>`;
+    }
+
+    await this.generateClassrooms();
+  }
+
+  async generateClassrooms() {
+    this.state.classRooms = [];
+    this.state.choosenRooms = [];
+
+    let rooms = (await getRoomsFromBuilding(document.getElementById('building_field').value)).classrooms;
     for (let i = 0; i < rooms.length; i++) {
       let room = rooms[i];
       this.state.classRooms.push(room);
       if (i == 0) {
         this.state.choosenRooms.push(room);
-        document.getElementById('add_classroom').innerHTML += `<option id='chooseRoom_${room.id}' value='${room.id}' disabled>${room.number}</option>`
-
-        document.getElementById('classrooms').innerHTML += `<div class="classroom-button raw-object nullable-object button-good auditory-object padding-h-big" id="${room.id}">${room.number}</div>`
+        document.getElementById('classrooms').innerHTML += `<div class="classroom-button raw-object nullable-object button-good auditory-object padding-h-big margin-h-r-small" id="${room.id}">${room.number}</div>`
       }
       else {
-        document.getElementById('add_classroom').innerHTML += `<option id='chooseRoom_${room.id}' value='${room.id}'>${room.number}</option>`
+        document.getElementById('classrooms').innerHTML += `<div class="classroom-button raw-object nullable-object button-inactive auditory-object padding-h-big margin-h-r-small" id="${room.id}">${room.number}</div>`
       }
-      
     }
-    document.getElementById('building_field').value = 2;
-    await this.generateSchedule(true);
+
+    await this.generateSchedule();
   }
 
-  async generateSchedule(defaultReq = false) {
+  async generateSchedule() {
     let start_end = await getBarriers(new Date(), this.state.weekDistance);
+    console.log(start_end);
     let res_tt;
 
-    if (!defaultReq) {
-      res_tt = await getTimetable(localStorage.getItem("keyGuardUserToken"), await parseDate(start_end.monday), await parseDate(start_end.sunday), document.getElementById('building_field').value, this.choosenRooms, [1, 2, 3, 4, 5]);
+    let choosenNumbersRooms = [];
+    for (let i = 0; i < this.state.choosenRooms.length; i++) {
+      let number = this.state.choosenRooms[i].number;
+      choosenNumbersRooms.push(number);
     }
-    else {
-      res_tt = await getTimetable(localStorage.getItem("keyGuardUserToken"), await parseDate(start_end.monday), await parseDate(start_end.sunday));
-    }
+    
+    res_tt = await getTimetable(localStorage.getItem("keyGuardUserToken"), await parseDate(start_end.monday), await parseDate(start_end.sunday), document.getElementById('building_field').value, choosenNumbersRooms, [1, 2]);
+
     if (res_tt == null) {
       this.state.weekDistance = 0;
       res_tt = await getTimetable(localStorage.getItem("keyGuardUserToken"), await parseDate(start_end.monday), await parseDate(start_end.sunday));
@@ -97,19 +110,34 @@ class TimetablePage extends React.Component {
     
 
     if (targetClasses.contains('classroom-button')) {
-      if (this.state.choosenRooms.length > 1) {
-        for (let i = 0; i < this.state.choosenRooms.length; i++) {
-          let room = this.state.choosenRooms[i];
-          if (room.id === targetId) {
-            this.state.choosenRooms.splice(i, 1);
-            target.remove();
-            document.getElementById(`chooseRoom_${room.id}`).removeAttribute('disabled');
-            return;
+      if (targetClasses.contains('button-good')) {
+        if (this.state.choosenRooms.length > 1) {
+          for (let i = 0; i < this.state.choosenRooms.length; i++) {
+            let room = this.state.choosenRooms[i];
+            if (room.id === targetId) {
+              this.state.choosenRooms.splice(i, 1);
+              target.classList.remove('button-good');
+              target.classList.add('button-inactive');
+              await this.generateSchedule();
+              return;
+            }
           }
+        }
+        else {
+          alert("Должна быть выбрана как минимум 1 аудитория!");
         }
       }
       else {
-        alert("Должна быть выбрана как минимум 1 аудитория!");
+        for (let i = 0; i < this.state.classRooms.length; i++) {
+          let room = this.state.classRooms[i];
+          if (room.id === targetId) {
+            this.state.choosenRooms.push(room);
+            target.classList.remove('button-inactive');
+            target.classList.add('button-good');
+            await this.generateSchedule();
+            return;
+          }
+        }
       }
     }
     else if (targetClasses.contains('change-week')) {
@@ -122,6 +150,11 @@ class TimetablePage extends React.Component {
       await this.generateSchedule();
     }
   };
+
+  handleBuildingChange = async (event) => {
+    document.getElementById('classrooms').innerHTML = '';
+    await this.generateClassrooms();
+  }
 
   addChooseRoom = async (event) => {
     let nId = document.getElementById('add_classroom').value;
@@ -147,16 +180,13 @@ class TimetablePage extends React.Component {
             <div class="raw-object w100-obj padding-v-normal vertical-top content-left">
               <div class="raw-object w20-obj nullable-object padding-h-normal vertical-top">
                 <div class="raw-object nullable-object w100-obj text-normal text-light text-width-weak">Корпус</div>
-                <input id="building_field" class="raw-object nullable-object w100-obj text-normal text-bold text-default padding-h-normal"></input>
+                <select id="building_field" class="raw-object nullable-object w100-obj text-normal text-bold text-default padding-h-normal"></select>
               </div><div class="raw-object w50-obj padding-h-normal vertical-top">
                 <div class="raw-object nullable-object w100-obj text-normal text-light text-width-weak">Аудитории</div>
                 <div id="classrooms" class="raw-object nullable-object w100-obj text-normal text-bold text-default box-borders padding-h-normal padding-v-normal">
                   
                 </div>
-              </div><div class="raw-object w30-obj nullable-object padding-h-normal">
-                <div class="raw-object w100-obj text-normal text-light text-width-weak">Добавить</div>
-                <select class="raw-object w100-obj nullable-object text-normal text-bold text-default padding-h-normal" id="add_classroom"></select>
-              </div><div class="raw-object w100-obj padding-h-normal vertical-top">
+              </div><div class="raw-object w30-obj padding-h-normal vertical-top">
                 <div class="raw-object nullable-object w100-obj text-normal text-light text-width-weak">Недели</div>
                 <div id="prev_week" class="change-week raw-object nullable-object text-huge text-bold text-default margin-h-r-normal">
                   ◀️

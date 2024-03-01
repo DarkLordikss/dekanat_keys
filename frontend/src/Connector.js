@@ -80,18 +80,17 @@ export async function getTimetable(token, start_date = null, end_date = null, bu
         const response = await fetch(`${default_way}applications/show_with_status?${params.toString()}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
         });
         
 
         if (!response.ok) {
             if (response.status === 400) {
-                alert('Произошла ошибка при входе!\nПроверьте правильность заполнения полей')
+                alert('Произошла ошибка!\nПроверьте правильность заполнения полей')
             }
             else if (response.status === 500) {
-                alert('Произошла ошибка при входе!\nОшибка на сервере!')
+                alert('Произошла ошибка!\nОшибка на сервере!')
             }
             return null;
         }
@@ -117,7 +116,62 @@ export async function checkAuth() {
 
 export async function getRooms() {
     try {
-        const response = await fetch(`${default_way}classroom/`, {
+        const response = await fetch(`${default_way}classroom/all`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        
+
+        if (!response.ok) {
+            if (response.status === 400) {
+                alert('Произошла ошибка!\nПроверьте правильность заполнения полей')
+            }
+            else if (response.status === 500) {
+                alert('Произошла ошибка!\nОшибка на сервере!')
+            }
+            return null;
+        }
+        const data = await response.json();
+        
+        return data;
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}
+
+export async function getBuildings() {
+    try {
+        const response = await fetch(`${default_way}building/get-all-buildings`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        
+
+        if (!response.ok) {
+            if (response.status === 400) {
+                alert('Произошла ошибка!\nПроверьте правильность заполнения полей')
+            }
+            else if (response.status === 500) {
+                alert('Произошла ошибка!\nОшибка на сервере!')
+            }
+            return null;
+        }
+        const data = await response.json();
+        
+        return data;
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}
+
+
+export async function getRoomsFromBuilding(building) {
+    try {
+        const response = await fetch(`${default_way}building/get-classrooms-from-building?building=${building}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'

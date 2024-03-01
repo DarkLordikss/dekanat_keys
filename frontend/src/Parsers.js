@@ -49,11 +49,16 @@ export const parseDate = async (date) => {
     return formattedDate;
 }
 
-export const getBarriers = async (date, weeks = -1) => {
-    const day = date.getDay(); // Получаем номер дня недели (0 - воскресенье, 1 - понедельник, ..., 6 - суббота)
-    const diff = date.getDate() - day + 1; // Вычисляем разницу между текущим днем и понедельником
-    let mondayDate = new Date(date.setDate(diff + weeks*7));
-    let sundayDate = new Date(date.setDate(diff + 6 + weeks*7));
+export const getBarriers = async (date, weeks = 0) => {
+    const day = date.getDay() - 1; // Получаем номер дня недели (0 - воскресенье, 1 - понедельник, ..., 6 - суббота)
+    const affect = day - weeks*7;
+    
+    let baseDateMonMS = new Date().getTime() - affect*86400000;
+    let baseDateSunMS = new Date().getTime() - (affect - 6) * 86400000;
+    
+    let mondayDate = new Date(baseDateMonMS);
+    let sundayDate = new Date(baseDateSunMS);
+    
     return {"monday": mondayDate, "sunday": sundayDate};
 }
 

@@ -16,6 +16,10 @@
     --button-default-a : rgb(92, 178, 232);
     --button-default-h : rgb(61, 146, 199);
 
+    --button-inactive :  rgb(160, 160, 160);
+    --button-inactive-a : rgb(180, 180, 180);
+    --button-inactive-h : rgb(140, 140, 140);
+
     --button-wrong : rgb(255, 51, 51);
     --button-wrong-a : rgb(255, 82, 82);
     --button-wrong-h : rgb(156, 30, 30);
