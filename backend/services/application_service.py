@@ -3,9 +3,8 @@ import uuid
 
 from sqlalchemy.orm import Session
 
-from sqlalchemy import or_, and_, not_, join, select
+from sqlalchemy import or_, and_
 from sqlalchemy.sql import text
-
 
 from typing import List
 
@@ -63,7 +62,8 @@ class ApplicationService:
             user_id: str
     ) -> bool:
         try:
-            application = db.query(Application).filter(and_(Application.id == application_id, Application.user_id == user_id)).first()
+            application = db.query(Application).filter(and_(Application.id == application_id,
+                                                            Application.user_id == user_id)).first()
 
             if application:
                 self.logger.info(f"(Checking Application existence) Got application with ID: {application.id}")
@@ -178,11 +178,11 @@ class ApplicationService:
             self.logger.error(f"(Check correct statuses) Error: {e}")
             raise
 
-    #@staticmethod
+    # @staticmethod
     async def show_available_classrooms(self,
-            db: Session,
-            available_classrooms_showing_dto: AvailableClassroomsShowingDTO
-    ):
+                                        db: Session,
+                                        available_classrooms_showing_dto: AvailableClassroomsShowingDTO
+                                        ):
         cartesian_product_with_filters = (
             'SELECT * FROM classrooms, timeslots '
             'WHERE '
@@ -203,7 +203,7 @@ class ApplicationService:
             'status_key_received': ApplicationStatuses.Key_received.value
         }).fetchall()
 
-        ##self.logger.info(f"DEKAT: {query_result} = {db.query(Classroom).count()} * {db.query(Timeslot).count()}")
+        # self.logger.info(f"DEKAT: {query_result} = {db.query(Classroom).count()} * {db.query(Timeslot).count()}")
         for x in query_result:
             self.logger.info(f"DEKAT: {x}")
 
@@ -294,6 +294,20 @@ class ApplicationService:
 
             application.application_status_id = new_status
             db.commit()
+
+            if (new_status is ApplicationStatuses.Confirmed.value or
+                    new_status is ApplicationStatuses.Key_received.value):
+                other_applications = db.query(Application).filter(
+                    (Application.class_date == application.class_date) &
+                    (Application.time_table_id == application.time_table_id) &
+                    (Application.classroom_id == application.classroom_id)
+                ).all()
+
+                for other_application in other_applications:
+                    if other_application.id != application.id:
+                        other_application.application_status_id = ApplicationStatuses.Rejected.value
+
+                db.commit()
 
             self.logger.info(f"(Change application status) Application status with id {application_id} updated "
                              f"successfully")
