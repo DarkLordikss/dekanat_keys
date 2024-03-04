@@ -6,12 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".activities.MainActivity">
+    tools:context=".activities.MyApplicationsActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Профиль"
+        android:text="Мои заявки"
         android:textSize="36sp"
         android:textColor="@color/lavender"
         android:layout_centerInParent="true"/>
