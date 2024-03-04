@@ -10,6 +10,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("user/login/") // замените "login" на путь к вашему API для входа
@@ -18,6 +19,9 @@ interface ApiService {
     fun registrationUser(@Body request: RegistrationRequest): Call<RegistrationResponse>
     @GET("user/")
     fun fetchUserProfile(@Header("Authorization") token: String): Call<UserProfile>
-
+    @GET("building/get-all-buildings")
+    fun fetchBuildings() : Call<BuildingsResponse>
+    @GET("building/get-classrooms-from-building")
+    fun fetchClassrooms(@Query("building") building:Int): Call<ClassroomResponse>
 
 }
