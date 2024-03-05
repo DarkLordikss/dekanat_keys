@@ -195,3 +195,31 @@ export async function getRoomsFromBuilding(building) {
         console.error('Error:', error.message);
     }
 }
+
+export async function changeApplicationStatus(app_id, status_id, token) {
+    try {
+        const response = await fetch(`${default_way}applications/change_deal_status/${app_id}?status_id=${status_id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+        
+
+        if (!response.ok) {
+            if (response.status === 400) {
+                alert('Произошла ошибка!\nПроверьте правильность заполнения полей')
+            }
+            else if (response.status === 500) {
+                alert('Произошла ошибка!\nОшибка на сервере!')
+            }
+            return null;
+        }
+        const data = await response.json();
+        
+        return data;
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}

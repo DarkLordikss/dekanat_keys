@@ -4,7 +4,7 @@ import './styles/ObjectsWidth.css';
 import './styles/SpacingStyles.css';
 import './styles/TextStyles.css';
 import './styles/ButtonsStyles.css';
-import { checkAuth, getTimetable, getRooms, getBuildings, getRoomsFromBuilding } from "./Connector.js";
+import { checkAuth, getTimetable, getRooms, getBuildings, getRoomsFromBuilding, changeApplicationStatus } from "./Connector.js";
 import { getStatusString, parseDate, getBarriers, parseSmallDate, getStatusStyle} from "./Parsers.js";
 
 class TimetablePage extends React.Component {
@@ -15,13 +15,20 @@ class TimetablePage extends React.Component {
       buildings: [],
       classRooms: [],
       choosenRooms: [],
-      weekDistance: 0
+      weekDistance: 0,
+      choosenApplicationId: '',
+      choosen_day: [0, 0],
+      applicatios: [[[], [], [], [], [], []], [[], [], [], [], [], []],
+      [[], [], [], [], [], []],[[], [], [], [], [], []],
+      [[], [], [], [], [], []], [[], [], [], [], [], []],
+      [[], [], [], [], [], []]]
     };
   }
 
   async componentDidMount() {
     document.addEventListener('click', this.handleClick);
     document.getElementById('building_field').addEventListener('change', this.handleBuildingChange);
+    document.getElementById('special_status').addEventListener('change', this.handleStatusChange);
 
     let authorized = checkAuth();
     if (!authorized) {
@@ -91,12 +98,13 @@ class TimetablePage extends React.Component {
         for (let k = 0; k < time.length; k++) {
           let pare = time[k];
           document.getElementById(`day_box_${i}_${j}`).innerHTML += 
-          `<div class="raw-object w100-obj nullable-object raw-box ${await getStatusStyle(pare.status)} margin-v-normal padding-h-normal padding-v-normal">
-            <div class="raw-object w100-obj nullable-object text-big text-width-bold">${pare.name}</div>
-            <div class="raw-object w100-obj nullable-object text-normal margin-v-b-normal">${pare.buildings} к., ${pare.class_number} ауд.</div>
-            <div class="raw-object w100-obj nullable-object text-normal margin-v-b-normal">${await getStatusString(pare.status)}</div>
-            <div class="raw-object w100-obj nullable-object text-small">Описание: ${pare.description}</div>
-          </div>`
+          `<div id="application_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object raw-box ${await getStatusStyle(pare.status)} margin-v-normal padding-h-normal padding-v-normal">
+            <div id="application_name_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object text-big text-width-bold">${pare.name}</div>
+            <div id="application_auditory_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object text-normal margin-v-b-normal">${pare.buildings} к., ${pare.class_number} ауд.</div>
+            <div id="application_status_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object text-normal margin-v-b-normal">${await getStatusString(pare.status)}</div>
+            <div id="application_description_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object text-small">Описание: ${pare.description}</div>
+          </div>`;
+          this.state.applicatios[i][j].push(pare);
         }
       }
     }
@@ -149,11 +157,72 @@ class TimetablePage extends React.Component {
       }
       await this.generateSchedule();
     }
+    else if (targetClasses.contains('application-box')) {
+      let idshnik = target.id.split("_");
+      let i = idshnik[1];
+      let j = idshnik[2];
+      let pareId = idshnik[3];
+      console.log(idshnik);
+
+      let pare = 0;
+      console.log(this.state.applicatios[i][j]);
+      
+      for (let k = 0; k < this.state.applicatios[i][j].length; k++) {
+        const application = this.state.applicatios[i][j][k];
+        console.log(this.state.applicatios[i][j][k], pareId);
+        if (application.classroom_id == pareId) {
+          pare = application;
+          break;
+        }
+      }
+
+      console.log(pare);
+
+      document.getElementById('application_info').style.display = 'block';
+      document.getElementById('application_pare_name').innerText = pare.name;
+      document.getElementById('application_pare_building').innerText = pare.buildings;
+      document.getElementById('application_pare_auditory').innerText = pare.class_number;
+      document.getElementById('application_pare_description').innerText = pare.description;
+      document.getElementById('special_status').value = pare.status
+      document.getElementById('save_status_changes').classList.remove('button-default');
+      document.getElementById('save_status_changes').classList.add('button-inactive');
+      document.getElementById('save_status_changes').id = `${pareId}_save_status_changes`;
+      this.state.choosenApplicationId = pareId;
+      this.state.choosen_day = [i, j]
+    }
+    else if (targetClasses.contains('black-content-window')) {
+      document.getElementById('application_info').style.display = '';
+    }
+    else if (targetClasses.contains('save_status_changes')) {
+      let responce = await changeApplicationStatus(target.id.split("_")[0], document.getElementById('special_status').value, localStorage.getItem("keyGuardUserToken"))
+      console.log(responce);
+      target.setAttribute('id', 'save_status_changes');
+      document.getElementById('save_status_changes').classList.remove('button-default');
+      document.getElementById('save_status_changes').classList.add('button-inactive');
+      
+      document.getElementById('application_info').style.display = '';
+      let day_object = document.getElementById(`application_${this.state.choosen_day[0]}_${this.state.choosen_day[1]}_${this.state.choosenApplicationId}`);
+      day_object.classList.remove('button-default');
+      day_object.classList.remove('button-inactive');
+      day_object.classList.remove('button-good');
+      day_object.classList.remove('button-wrong');
+      day_object.classList.remove('button-warning');
+      day_object.classList.remove('button-gifted');
+      day_object.classList.add(await getStatusStyle(document.getElementById('special_status').value));
+      document.getElementById(`application_status_${this.state.choosen_day[0]}_${this.state.choosen_day[1]}_${this.state.choosenApplicationId}`).innerText = await getStatusString(document.getElementById('special_status').value);
+      this.state.choosenApplicationId = '';
+      this.state.choosen_day = [0, 0]
+    }
   };
 
   handleBuildingChange = async (event) => {
     document.getElementById('classrooms').innerHTML = '';
     await this.generateClassrooms();
+  }
+
+  handleStatusChange = async (event) => {
+    document.getElementById(`${this.state.choosenApplicationId}_save_status_changes`).classList.remove('button-inactive');
+    document.getElementById(`${this.state.choosenApplicationId}_save_status_changes`).classList.add('button-default');
   }
 
   addChooseRoom = async (event) => {
@@ -346,6 +415,44 @@ class TimetablePage extends React.Component {
           </div>
           
             
+          </div>
+        </div>
+        <div id="application_info" class="middle-wall-object black-content-window">
+          <div class="raw-object w100-obj raw-box content-left">
+            <div class="raw-object w100-obj nullable-object raw-box margin-v-normal padding-h-normal padding-v-normal">
+              <div id="application_pare_name" class="raw-object w100-obj nullable-object text-big text-width-bold">Пара</div>
+              <div class="raw-object w100-obj nullable-object text-normal margin-v-b-normal">
+                <div class="raw-object nullable-object text-normal text-width-bold margin-h-r-normal">
+                  Корпус:
+                </div><div id="application_pare_building" class="raw-object nullable-object text-normal text-width-normal">
+                </div>
+              </div>
+              <div class="raw-object w100-obj nullable-object text-normal margin-v-b-normal">
+                <div class="raw-object nullable-object text-normal text-width-bold margin-h-r-normal">
+                  Аудитория:
+                </div><div id="application_pare_auditory" class="raw-object nullable-object text-normal text-width-normal">
+                </div>
+              </div>
+              <div class="raw-object w100-obj nullable-object text-normal margin-v-b-normal">
+                <div class="raw-object nullable-object text-normal text-width-bold margin-h-r-normal">
+                  Статус:
+                </div><select id="special_status" class="raw-object w30-obj nullable-object text-normal text-width-bold">
+                  <option id="status_1" value="1">Не обработано</option>
+                  <option id="status_2" value="2">Подтверждено</option>
+                  <option id="status_3" value="3">Ключ получен</option>
+                  <option id="status_4" value="4">Ключ сдан</option>
+                  <option id="status_5" value="5">Отклонено</option>
+                  <option id="status_6" value="6">Недействительно</option>
+                </select>
+              </div>
+              <div class="raw-object w100-obj nullable-object text-normal">
+                <div class="raw-object nullable-object text-normal text-width-bold margin-h-r-normal">
+                  Описание:
+                </div><div id="application_pare_description" class="raw-object nullable-object text-normal text-width-normal">
+                </div>
+              </div>
+              <div id='save_status_changes' class="save_status_changes 100w-obj button-inactive text-width-bold text-normal margin-v-normal content-center padding-v-normal raw-box">Сохранить</div>
+            </div>
           </div>
         </div>
       </div>
