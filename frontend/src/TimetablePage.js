@@ -76,11 +76,11 @@ class TimetablePage extends React.Component {
       choosenNumbersRooms.push(number);
     }
     
-    res_tt = await getTimetable(localStorage.getItem("keyGuardUserToken"), await parseDate(start_end.monday), await parseDate(start_end.sunday), document.getElementById('building_field').value, choosenNumbersRooms, [1, 2]);
+    res_tt = await getTimetable(await parseDate(start_end.monday), await parseDate(start_end.sunday), document.getElementById('building_field').value, choosenNumbersRooms, [1, 2, 3, 4, 5, 6]);
 
     if (res_tt == null) {
       this.state.weekDistance = 0;
-      res_tt = await getTimetable(localStorage.getItem("keyGuardUserToken"), await parseDate(start_end.monday), await parseDate(start_end.sunday));
+      res_tt = await getTimetable(await parseDate(start_end.monday), await parseDate(start_end.sunday));
     }
     
     await this.setSchedule(res_tt.schedule);

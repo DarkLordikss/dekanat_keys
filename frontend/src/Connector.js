@@ -57,7 +57,7 @@ export async function user(token) {
     }
 }
 
-export async function getTimetable(token, start_date = null, end_date = null, building = 2, classrooms = [402], statuses = [1, 2, 3, 4, 5], user_id = null) {
+export async function getTimetable(start_date = null, end_date = null, building = 2, classrooms = [402], statuses = [1, 2, 3, 4, 5, 6], user_id = null) {
     const params = new URLSearchParams();
     params.append('building', building);
     params.append('start_date', start_date);
