@@ -42,6 +42,11 @@ class TimetablePage extends React.Component {
       document.getElementById('building_field').innerHTML += `<option id='chooseBuilding_${build}' value='${build}'>${build}</option>`;
     }
 
+    for (let i = 1; i <= 6; i++) {
+      document.getElementById(`status_${i}_check`).checked = true;
+      document.getElementById(`status_${i}_check`).addEventListener('change', this.handleStatusesFilter);
+    }
+
     await this.generateClassrooms();
   }
 
@@ -71,12 +76,20 @@ class TimetablePage extends React.Component {
     let res_tt;
 
     let choosenNumbersRooms = [];
+    let choosenStatuses = [];
+
     for (let i = 0; i < this.state.choosenRooms.length; i++) {
       let number = this.state.choosenRooms[i].number;
       choosenNumbersRooms.push(number);
     }
+
+    for (let i = 1; i <= 6; i++) {
+      if (document.getElementById(`status_${i}_check`).checked) {
+        choosenStatuses.push(i);
+      }
+    }
     
-    res_tt = await getTimetable(await parseDate(start_end.monday), await parseDate(start_end.sunday), document.getElementById('building_field').value, choosenNumbersRooms, [1, 2, 3, 4, 5, 6]);
+    res_tt = await getTimetable(await parseDate(start_end.monday), await parseDate(start_end.sunday), document.getElementById('building_field').value, choosenNumbersRooms, choosenStatuses);
 
     if (res_tt == null) {
       this.state.weekDistance = 0;
@@ -99,10 +112,10 @@ class TimetablePage extends React.Component {
           let pare = time[k];
           document.getElementById(`day_box_${i}_${j}`).innerHTML += 
           `<div id="application_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object raw-box ${await getStatusStyle(pare.status)} margin-v-normal padding-h-normal padding-v-normal">
-            <div id="application_name_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object text-big text-width-bold">${pare.name}</div>
-            <div id="application_auditory_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object text-normal margin-v-b-normal">${pare.buildings} к., ${pare.class_number} ауд.</div>
-            <div id="application_status_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object text-normal margin-v-b-normal">${await getStatusString(pare.status)}</div>
-            <div id="application_description_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object text-small">Описание: ${pare.description}</div>
+            <div id="application_name_${i}_${j}_${pare.classroom_id}" class="application-box application-child raw-object w100-obj nullable-object text-big text-width-bold">${pare.name}</div>
+            <div id="application_auditory_${i}_${j}_${pare.classroom_id}" class="application-box application-child raw-object w100-obj nullable-object text-normal margin-v-b-normal">${pare.buildings} к., ${pare.class_number} ауд.</div>
+            <div id="application_status_${i}_${j}_${pare.classroom_id}" class="application-box application-child raw-object w100-obj nullable-object text-normal margin-v-b-normal">${await getStatusString(pare.status)}</div>
+            <div id="application_description_${i}_${j}_${pare.classroom_id}" class="application-box application-child raw-object w100-obj nullable-object text-small">Описание: ${pare.description}</div>
           </div>`;
           this.state.applicatios[i][j].push(pare);
         }
@@ -162,6 +175,13 @@ class TimetablePage extends React.Component {
       let i = idshnik[1];
       let j = idshnik[2];
       let pareId = idshnik[3];
+
+      if (targetClasses.contains('application-child')) {
+        i = idshnik[2];
+        j = idshnik[3];
+        pareId = idshnik[4];
+      }
+
       console.log(idshnik);
 
       let pare = 0;
@@ -172,13 +192,11 @@ class TimetablePage extends React.Component {
         console.log(this.state.applicatios[i][j][k], pareId);
         if (application.classroom_id == pareId) {
           pare = application;
+          console.log(this.state.applicatios[this.state.choosen_day[0]][this.state.choosen_day[1]][k]);
           break;
         }
       }
 
-      console.log(pare);
-
-      document.getElementById('application_info').style.display = 'block';
       document.getElementById('application_pare_name').innerText = pare.name;
       document.getElementById('application_pare_building').innerText = pare.buildings;
       document.getElementById('application_pare_auditory').innerText = pare.class_number;
@@ -186,32 +204,57 @@ class TimetablePage extends React.Component {
       document.getElementById('special_status').value = pare.status
       document.getElementById('save_status_changes').classList.remove('button-default');
       document.getElementById('save_status_changes').classList.add('button-inactive');
-      document.getElementById('save_status_changes').id = `${pareId}_save_status_changes`;
+      document.getElementById('save_status_changes').id = `save_status_changes`;
+
+      for (let ii = pare.status; ii <= 6; ii++) {
+        document.getElementById(`status_${ii}`).removeAttribute('disabled');
+      }
+
       this.state.choosenApplicationId = pareId;
-      this.state.choosen_day = [i, j]
+      this.state.choosen_day = [i, j];
+
+      document.getElementById('application_info').style.display = 'block';
     }
     else if (targetClasses.contains('black-content-window')) {
       document.getElementById('application_info').style.display = '';
+      // document.getElementById(`${}_save_status_changes`).setAttribute('id', 'save_status_changes');
     }
-    else if (targetClasses.contains('save_status_changes')) {
-      let responce = await changeApplicationStatus(target.id.split("_")[0], document.getElementById('special_status').value, localStorage.getItem("keyGuardUserToken"))
-      console.log(responce);
-      target.setAttribute('id', 'save_status_changes');
+    else if (targetClasses.contains('save_status_changes') && targetClasses.contains('button-default')) {
+      let pareId = this.state.choosenApplicationId;
+      let response = await changeApplicationStatus(pareId, document.getElementById('special_status').value, localStorage.getItem("keyGuardUserToken"))
+      console.log(response);
       document.getElementById('save_status_changes').classList.remove('button-default');
       document.getElementById('save_status_changes').classList.add('button-inactive');
       
-      document.getElementById('application_info').style.display = '';
-      let day_object = document.getElementById(`application_${this.state.choosen_day[0]}_${this.state.choosen_day[1]}_${this.state.choosenApplicationId}`);
-      day_object.classList.remove('button-default');
-      day_object.classList.remove('button-inactive');
-      day_object.classList.remove('button-good');
-      day_object.classList.remove('button-wrong');
-      day_object.classList.remove('button-warning');
-      day_object.classList.remove('button-gifted');
-      day_object.classList.add(await getStatusStyle(document.getElementById('special_status').value));
-      document.getElementById(`application_status_${this.state.choosen_day[0]}_${this.state.choosen_day[1]}_${this.state.choosenApplicationId}`).innerText = await getStatusString(document.getElementById('special_status').value);
-      this.state.choosenApplicationId = '';
-      this.state.choosen_day = [0, 0]
+      if (response != null) {
+        document.getElementById('application_info').style.display = '';
+        let day_object = document.getElementById(`application_${this.state.choosen_day[0]}_${this.state.choosen_day[1]}_${this.state.choosenApplicationId}`);
+        day_object.classList.remove('button-default');
+        day_object.classList.remove('button-inactive');
+        day_object.classList.remove('button-good');
+        day_object.classList.remove('button-wrong');
+        day_object.classList.remove('button-warning');
+        day_object.classList.remove('button-gifted');
+        day_object.classList.add(await getStatusStyle(document.getElementById('special_status').value));
+        document.getElementById(`application_status_${this.state.choosen_day[0]}_${this.state.choosen_day[1]}_${this.state.choosenApplicationId}`).innerText = await getStatusString(document.getElementById('special_status').value);
+        
+        for (let index = 0; index < this.state.applicatios[this.state.choosen_day[0]][this.state.choosen_day[1]].length; index++) {
+          let applic = this.state.applicatios[this.state.choosen_day[0]][this.state.choosen_day[1]][index];
+          if (applic.classroom_id == this.state.choosenApplicationId) {
+            applic.status = parseInt(document.getElementById('special_status').value);
+            this.state.applicatios[this.state.choosen_day[0]][this.state.choosen_day[1]][index] = applic;
+            break;
+          }
+        }
+        
+        this.state.choosenApplicationId = '';
+        this.state.choosen_day = [0, 0];
+        
+
+        for (let i = 1; i <= 6; i++) {
+          document.getElementById(`status_${i}`).setAttribute('disabled', 'disabled');
+        }
+      }
     }
   };
 
@@ -221,8 +264,12 @@ class TimetablePage extends React.Component {
   }
 
   handleStatusChange = async (event) => {
-    document.getElementById(`${this.state.choosenApplicationId}_save_status_changes`).classList.remove('button-inactive');
-    document.getElementById(`${this.state.choosenApplicationId}_save_status_changes`).classList.add('button-default');
+    document.getElementById(`save_status_changes`).classList.remove('button-inactive');
+    document.getElementById(`save_status_changes`).classList.add('button-default');
+  }
+
+  handleStatusesFilter = async (event) => {
+    await this.generateSchedule();
   }
 
   addChooseRoom = async (event) => {
@@ -261,6 +308,29 @@ class TimetablePage extends React.Component {
                   ◀️
                 </div><div id="next_week" class="change-week raw-object nullable-object text-huge text-bold text-default">
                   ▶️
+                </div>
+              </div><div class="raw-object w100-obj padding-h-normal vertical-top">
+                <div class="raw-object nullable-object w100-obj text-normal text-light text-width-weak">Статусы</div>
+                <div class="raw-object nullable-object w100-obj text-normal text-default text-width-normal">
+                  <div class="raw-object nullable-object no-wrap vertical-middle padding-h-normal w33-obj">
+                    <input type='checkbox' name='status_1' id='status_1_check' class="raw-object nullable-object checkbox vertical-middle"/>
+                    <div class="raw-object nullable-object margin-h-l-normal vertical-middle no-wrap">Необработано</div>
+                  </div><div class="raw-object nullable-object no-wrap vertical-middle padding-h-normal w33-obj">
+                    <input type='checkbox' name='status_2' id='status_2_check' class="raw-object nullable-object checkbox vertical-middle"/>
+                    <div class="raw-object nullable-object margin-h-l-normal vertical-middle no-wrap">Подтверждено</div>
+                  </div><div class="raw-object nullable-object no-wrap vertical-middle padding-h-normal w33-obj">
+                    <input type='checkbox' name='status_3' id='status_3_check' class="raw-object nullable-object checkbox vertical-middle"/>
+                    <div class="raw-object nullable-object margin-h-l-normal vertical-middle no-wrap">Ключ получен</div>
+                  </div><div class="raw-object nullable-object no-wrap vertical-middle padding-h-normal w33-obj">
+                    <input type='checkbox' name='status_4' id='status_4_check' class="raw-object nullable-object checkbox vertical-middle"/>
+                    <div class="raw-object nullable-object margin-h-l-normal vertical-middle no-wrap">Ключ сдан</div>
+                  </div><div class="raw-object nullable-object no-wrap vertical-middle padding-h-normal w33-obj">
+                    <input type='checkbox' name='status_5' id='status_5_check' class="raw-object nullable-object checkbox vertical-middle"/>
+                    <div class="raw-object nullable-object margin-h-l-normal vertical-middle no-wrap">Отключено</div>
+                  </div><div class="raw-object nullable-object no-wrap vertical-middle padding-h-normal w33-obj">
+                    <input type='checkbox' name='status_6' id='status_6_check' class="raw-object nullable-object checkbox vertical-middle"/>
+                    <div class="raw-object nullable-object margin-h-l-normal vertical-middle no-wrap">Недействительно</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -437,12 +507,12 @@ class TimetablePage extends React.Component {
                 <div class="raw-object nullable-object text-normal text-width-bold margin-h-r-normal">
                   Статус:
                 </div><select id="special_status" class="raw-object w30-obj nullable-object text-normal text-width-bold">
-                  <option id="status_1" value="1">Не обработано</option>
-                  <option id="status_2" value="2">Подтверждено</option>
-                  <option id="status_3" value="3">Ключ получен</option>
-                  <option id="status_4" value="4">Ключ сдан</option>
-                  <option id="status_5" value="5">Отклонено</option>
-                  <option id="status_6" value="6">Недействительно</option>
+                  <option id="status_1" value="1" disabled>Не обработано</option>
+                  <option id="status_2" value="2" disabled>Подтверждено</option>
+                  <option id="status_3" value="3" disabled>Ключ получен</option>
+                  <option id="status_4" value="4" disabled>Ключ сдан</option>
+                  <option id="status_5" value="5" disabled>Отклонено</option>
+                  <option id="status_6" value="6" disabled>Недействительно</option>
                 </select>
               </div>
               <div class="raw-object w100-obj nullable-object text-normal">

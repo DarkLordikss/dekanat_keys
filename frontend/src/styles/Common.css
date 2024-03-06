@@ -145,6 +145,10 @@ select:active {
     border-radius: 100px;
     vertical-align: top;
 }
+.checkbox {
+    min-height: 20px;
+    min-width: 20px;
+}
 
 .raw-box {
     border-radius: 3px;
