@@ -1,3 +1,5 @@
+import { getStatusString, parseDate, getBarriers, parseSmallDate, getStatusStyle} from "./Parsers.js";
+
 const default_way = 'https://zomnbi-mozgi-kushat-iii-backend.pmc-python.ru/api/v1/';
 
 export async function login(email, password) {
@@ -46,6 +48,9 @@ export async function user(token) {
         if (!response.ok) {
             if (response.status === 500) {
                 alert('Произошла ошибка при входе!\nОшибка на сервере!')
+            }
+            else if (response.status === 403) {
+                window.location.href = '/'
             }
             return null;
         }
@@ -209,7 +214,10 @@ export async function changeApplicationStatus(app_id, status_id, token) {
 
         if (!response.ok) {
             if (response.status === 400) {
-                alert('Произошла ошибка!\nПроверьте правильность заполнения полей')
+                alert(`Произошла ошибка!\nНевозможно сменить статус с текущего на "${await getStatusString(status_id)}"`)
+            }
+            else if (response.status === 403) {
+                window.location.href = '/'
             }
             else if (response.status === 500) {
                 alert('Произошла ошибка!\nОшибка на сервере!')
