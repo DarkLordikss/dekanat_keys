@@ -1,6 +1,5 @@
 package com.liid.dekanatkeys.fragments
 
-import android.R
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.liid.dekanatkeys.R
 import com.liid.dekanatkeys.databinding.FragmentChooseBuildingBinding
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
@@ -47,10 +47,10 @@ class ChooseBuildingFragment : Fragment() {
     }
 
     private fun fillList(buildings: List<String> ){
-        val b = buildings.map { it + " корпус"}
+        val b = buildings.map { "$it корпус" }
         val adapter = ArrayAdapter<String>(
             activityContext,
-            R.layout.simple_list_item_1,
+            R.layout.list_element,
             b
         )
         binding.buildingListView.adapter = adapter

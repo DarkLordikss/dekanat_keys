@@ -15,17 +15,19 @@ import java.time.format.DateTimeFormatter
 
 
 @SuppressLint("UseCompatLoadingForDrawables")
-class OKODateBar(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
+class OKODateBar(context: Context, attrs: AttributeSet?, val parentFragment: OKODateBarInteraction) : LinearLayout(context, attrs) {
 
     private val dayButtons : List<OKODayButton>
     private val dayButtonLayouts : List<LinearLayout>
     private val nextImageButton : ImageButton
     private val prevImageButton : ImageButton
     private val weekDays = listOf("пн", "вт" , "ср", "чт", "пт", "сб", "вс")
+    private val mouthNames = listOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
     private lateinit var activeButton: OKODayButton
     private var weekOffset = 0L
 
     init {
+//        parentFragment = context as OKODateBarInteraction
         dayButtons = List(7) { index ->
             val button = OKODayButton(context, null)
             button.setOnClickListener{it ->
@@ -45,6 +47,7 @@ class OKODateBar(context: Context, attrs: AttributeSet?) : LinearLayout(context,
             val weekDayTextView = TextView(context).apply {
                 gravity = Gravity.CENTER
                 text = weekDays[index]
+                setTextColor(context.getColor(R.color.gray))
             }
 
             l.addView(weekDayTextView)
@@ -94,13 +97,16 @@ class OKODateBar(context: Context, attrs: AttributeSet?) : LinearLayout(context,
     private fun setDatesToButtons(){
         val dates = getDaysOfWeek(weekOffset)
         val currDate = LocalDate.now()
-        setActive(dayButtons[0])
 
+        for (i in 0 until dates.size){
+            dayButtons[i].setDate(dates[i])
+        }
+
+        setActive(dayButtons[0])
         for (i in 0 until dates.size){
             if(dates[i] == currDate){
                 setActive(dayButtons[i])
             }
-            dayButtons[i].setDate(dates[i])
         }
     }
 
@@ -110,11 +116,13 @@ class OKODateBar(context: Context, attrs: AttributeSet?) : LinearLayout(context,
         }
         btn.setActive()
         activeButton = btn
+        parentFragment.setMonth(mouthNames[activeButton.getDate().monthValue-1])
     }
 
     private fun getDaysOfWeek(offset: Long) : MutableList<LocalDate>{
         val dates = mutableListOf<LocalDate>()
         val currentDay = LocalDate.now().plusDays(offset * 7)
+
         val currentDayOfWeek = currentDay.dayOfWeek.ordinal
         val mondayIndex = - currentDayOfWeek
         var di = mondayIndex.toLong()

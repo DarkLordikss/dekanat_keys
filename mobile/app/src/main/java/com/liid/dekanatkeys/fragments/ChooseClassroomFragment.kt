@@ -58,7 +58,7 @@ class ChooseClassroomFragment : Fragment() {
     private fun fillList(classrooms: List<String> ){
         val adapter = ArrayAdapter<String>(
             activityContext,
-            android.R.layout.simple_list_item_1,
+            R.layout.list_element,
             classrooms
         )
         binding.classroomListView.adapter = adapter

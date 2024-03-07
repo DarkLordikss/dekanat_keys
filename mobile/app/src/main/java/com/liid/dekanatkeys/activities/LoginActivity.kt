@@ -80,6 +80,19 @@ class LoginActivity: AppCompatActivity() {
     private fun login(email:String, password:String){
         val loginRequest = LoginRequest(email, password)
 
+//        val call: Call<List<String>> = OKOApiSingleton.api.loginUser(loginRequest)
+
+//        call.enqueue(OKOCallback<List<String>>(
+//            successCallback = {response ->
+//                for (i in response.body()!!){
+//                    Log(i)
+//                }
+//            },
+//            errorCallback = {response ->
+//                Log("error code:" + response.code().toString())
+//            }
+//        ))
+
         val call: Call<LoginResponse> = OKOApiSingleton.api.loginUser(loginRequest)
 
         call.enqueue(OKOCallback<LoginResponse>(

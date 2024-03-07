@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:text="Корпус"
         android:textSize="30sp"
+        android:fontFamily="@font/gotham_book"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,6 +23,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
+        android:divider="@color/black"
+        android:dividerHeight="0.5dp"
+        android:footerDividersEnabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
