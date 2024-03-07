@@ -12,9 +12,6 @@
     android:background="@color/white"
     tools:context=".activities.LoginActivity">
 
-
-
-
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
@@ -80,18 +77,16 @@
             android:textSize="20sp" />
     </LinearLayout>
 
-
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Вход"
+        android:fontFamily="@font/gotham_book"
         android:textSize="30sp"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

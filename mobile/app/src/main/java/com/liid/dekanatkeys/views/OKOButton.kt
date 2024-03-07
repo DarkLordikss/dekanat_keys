@@ -34,10 +34,4 @@ class OKOButton(private val context: Context, attrs: AttributeSet?) : androidx.a
         if(inited) updateButtonState()
     }
 
-    private val textPaint = Paint().apply {
-        color = currentTextColor
-        this.textSize = this@OKOButton.textSize
-        isAntiAlias = true
-        isAllCaps = false
-    }
 }

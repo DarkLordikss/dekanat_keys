@@ -14,7 +14,6 @@ private const val CLASSROOM_PARAM = "classroom"
 class SheduleFragment : Fragment() {
     private lateinit var binding: FragmentSheduleBinding
 
-    // TODO: Rename and change types of parameters
     private var building: String? = null
     private var classroom: String? = null
 
@@ -36,8 +35,8 @@ class SheduleFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.building.text = "Корпус: " + building
-        binding.classroom.text = "Аудитория: " + classroom
+//        binding.building.text = "Корпус: " + building
+//        binding.classroom.text = "Аудитория: " + classroom
     }
 
     companion object {
