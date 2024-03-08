@@ -32,6 +32,6 @@ interface ApiService {
                           @Query("start_date") start_date : LocalDate,
                           @Query("end_date") end_date : LocalDate,
                           @Query("statuses") statuses: List<Int>,
-                          @Query("classrooms") classrooms: List<Int>): Call<String>
+                          @Query("classrooms") classrooms: List<Int>): Call<ApplicationsResponse>
 
 }

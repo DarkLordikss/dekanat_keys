@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter
 
 
 @SuppressLint("UseCompatLoadingForDrawables")
-class OKODateBar(context: Context, attrs: AttributeSet?, val parentFragment: OKODateBarInteraction) : LinearLayout(context, attrs) {
+class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragment: OKODateBarInteraction) : LinearLayout(context, attrs) {
 
     private val dayButtons : List<OKODayButton>
     private val dayButtonLayouts : List<LinearLayout>

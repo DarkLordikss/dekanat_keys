@@ -6,7 +6,7 @@ import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.widget.LinearLayout
 
-class OKOLinearLayoutRadius(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
+open class OKOLinearLayoutRadius(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
     private var radius = 20f
 
     init {

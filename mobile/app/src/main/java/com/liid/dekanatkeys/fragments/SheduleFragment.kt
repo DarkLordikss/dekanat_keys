@@ -6,7 +6,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.liid.dekanatkeys.R
 import com.liid.dekanatkeys.activities.MainActivity
 import com.liid.dekanatkeys.databinding.FragmentSheduleBinding
@@ -14,10 +17,13 @@ import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
 import com.liid.dekanatkeys.helpers.OKOCallback
 import com.liid.dekanatkeys.models.ApplicationsRequest
+import com.liid.dekanatkeys.models.ApplicationsResponse
+import com.liid.dekanatkeys.models.TimetableWithList
 import com.liid.dekanatkeys.models.user.LoginRequest
 import com.liid.dekanatkeys.models.user.LoginResponse
 import com.liid.dekanatkeys.views.OKODateBar
 import com.liid.dekanatkeys.views.OKODateBarInteraction
+import com.liid.dekanatkeys.views.TimetableRecycleAdapter
 import retrofit2.Call
 import java.time.LocalDate
 
@@ -29,7 +35,8 @@ class SheduleFragment : Fragment(), OKODateBarInteraction {
 
     private var building: String? = null
     private var classroom: String? = null
-    private lateinit var okoDateBar:OKODateBar
+    private lateinit var okoDateBar: OKODateBar
+//    private lateinit var timetableLayout: LinearLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -45,19 +52,26 @@ class SheduleFragment : Fragment(), OKODateBarInteraction {
         binding = FragmentSheduleBinding.inflate(inflater, container, false)
 
         okoDateBar = OKODateBar(requireContext(), null, this).apply {
-            layoutParams = ConstraintLayout.LayoutParams(
+            layoutParams = LinearLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.MATCH_PARENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin = 10
-                startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-                endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-                topToBottom = R.id.monthText
             }
         }
+        binding.bodyLayout.addView(okoDateBar, 1)
 
-        binding.root.addView(okoDateBar)
+        val timetableRecycleView = binding.timetableRecycleView
+        timetableRecycleView.layoutManager = LinearLayoutManager(requireContext())
+        timetableRecycleView.adapter = TimetableRecycleAdapter(fillList())
+
         return binding.root
+    }
+
+    private fun fillList(): List<String> {
+        val data = mutableListOf<String>()
+        (0..30).forEach { i -> data.add("$i element") }
+        return data
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,16 +81,33 @@ class SheduleFragment : Fragment(), OKODateBarInteraction {
 
     private fun getApplications(){
         building?.let { Log(it) }
-        val applicationRequest = ApplicationsRequest( building!!.toInt(), LocalDate.now(), LocalDate.now().plusDays(1), classroom!!.toInt())
+        val applicationRequest = ApplicationsRequest( building!!.toInt(), LocalDate.parse("2024-02-13"), LocalDate.parse("2024-02-16"), classroom!!.toInt())
 
         OKOApiSingleton.api.fetchApplications(applicationRequest.building,
                                             applicationRequest.start_date,
                                             applicationRequest.end_date,
                                             applicationRequest.statuses,
                                             applicationRequest.classrooms)
-            .enqueue(OKOCallback<String>(
+            .enqueue(OKOCallback<ApplicationsResponse>(
             successCallback = {response ->
-                response.body()?.let { Log(it) }
+                if (response.body() != null){
+                    for(td in response.body()!!.TimetableWithDates){
+
+                        val timetable = TimetableWithList(td.timetable)
+
+                        for (i in 0 until timetable.applications.size){
+                            if (timetable.applications[i] == null){
+                                Log("$i: null")
+                            }
+                            else{
+                                Log("$i: ${timetable.applications[i]!!.id}")
+                            }
+                        }
+
+                        Log(td.date)
+                    }
+                }
+
             },
             errorCallback = {response ->
                 Log("error code:" + response.code().toString())

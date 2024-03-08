@@ -7,16 +7,36 @@
     android:layout_height="match_parent"
     tools:context=".fragments.SheduleFragment">
 
-    <TextView
-        android:id="@+id/monthText"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/bodyLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Месяц"
-        android:fontFamily="@font/gotham_book"
-        android:textColor="@color/black"
-        android:textSize="20dp"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/monthText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/gotham_book"
+            android:text="Месяц"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:layout_gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/timetableRecycleView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:listitem="@layout/recyclerview_test_item"
+            />
+    </LinearLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
