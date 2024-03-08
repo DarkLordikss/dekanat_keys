@@ -99,12 +99,12 @@
 
     </LinearLayout>
 
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Регистрация"
+        android:fontFamily="@font/gotham_book"
         android:textColor="@color/black"
         android:textSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
