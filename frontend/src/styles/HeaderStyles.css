@@ -1,0 +1,41 @@
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 70px;
+    background-color: var(--button-inactive-a);
+    box-sizing: border-box;
+    
+}
+
+.navigation-bar {
+    box-sizing: border-box;
+    border-bottom: 3px solid var(--box-color);
+    width: min-content;
+    border-radius: 0px;
+    transition: 0.5s;
+    height: 40px;
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 180px;
+}
+
+.navigation-bar:hover {
+    width: 190px;
+    margin-left: 5px;
+    margin-right: 5px;
+    transition: 0.1s;
+}
+
+.navigation-bar:active {
+    width: 195px;
+    margin-left: 2.5px;
+    margin-right: 2.5px;
+    transition: 0.02s;
+}
+
+.navigation-container {
+    height: 100%;
+    padding-top: 10px;
+}

@@ -1,6 +1,7 @@
 * {
     white-space: normal;
     scrollbar-width: none;
+    z-index: 0;
 }
 
 :root {
@@ -128,6 +129,10 @@ select:active {
     min-width: 250px;
     max-width: 1000px;
     width: min-content;
+}
+.bigger-object {
+    min-width: 250px;
+    max-width: 2000px;
 }
 .smaller-object {
     min-width: 180px;
