@@ -60,10 +60,8 @@ class TimetableRecycleAdapter(private val applications: List<Application?>) : Re
 
     override fun getItemViewType(position: Int): Int {
         return if (applications[position] != null){
-            Log("VIEW_TYPE_BOOKED")
             VIEW_TYPE_BOOKED
         } else{
-            Log("VIEW_TYPE_FREE")
             VIEW_TYPE_FREE
         }
     }
