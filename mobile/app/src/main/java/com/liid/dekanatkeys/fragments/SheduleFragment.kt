@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.liid.dekanatkeys.R
 import com.liid.dekanatkeys.activities.MainActivity
 import com.liid.dekanatkeys.databinding.FragmentSheduleBinding
@@ -36,7 +37,7 @@ class SheduleFragment : Fragment(), OKODateBarInteraction {
     private var building: String? = null
     private var classroom: String? = null
     private lateinit var okoDateBar: OKODateBar
-//    private lateinit var timetableLayout: LinearLayout
+    private lateinit var timetableRecycleView : RecyclerView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -61,9 +62,9 @@ class SheduleFragment : Fragment(), OKODateBarInteraction {
         }
         binding.bodyLayout.addView(okoDateBar, 1)
 
-        val timetableRecycleView = binding.timetableRecycleView
+        timetableRecycleView = binding.timetableRecycleView
         timetableRecycleView.layoutManager = LinearLayoutManager(requireContext())
-        timetableRecycleView.adapter = TimetableRecycleAdapter(fillList())
+//        timetableRecycleView.adapter = TimetableRecycleAdapter(fillList())
 
         return binding.root
     }
@@ -91,21 +92,33 @@ class SheduleFragment : Fragment(), OKODateBarInteraction {
             .enqueue(OKOCallback<ApplicationsResponse>(
             successCallback = {response ->
                 if (response.body() != null){
-                    for(td in response.body()!!.TimetableWithDates){
+                    val timetable = TimetableWithList(response.body()!!.TimetableWithDates[1].timetable)
+                    timetableRecycleView.adapter = TimetableRecycleAdapter(timetable.applications)
 
-                        val timetable = TimetableWithList(td.timetable)
+//                    for (i in 0 until timetable.applications.size){
+//                            if (timetable.applications[i] == null){
+//                                Log("$i: null")
+//                            }
+//                            else{
+//                                Log("$i: ${timetable.applications[i]!!.id}")
+//                            }
+//                        }
 
-                        for (i in 0 until timetable.applications.size){
-                            if (timetable.applications[i] == null){
-                                Log("$i: null")
-                            }
-                            else{
-                                Log("$i: ${timetable.applications[i]!!.id}")
-                            }
-                        }
-
-                        Log(td.date)
-                    }
+//                    for(td in response.body()!!.TimetableWithDates){
+//
+//                        val timetable = TimetableWithList(td.timetable)
+//                        timetableRecycleView.adapter = TimetableRecycleAdapter(timetable.applications)
+//                        for (i in 0 until timetable.applications.size){
+//                            if (timetable.applications[i] == null){
+//                                Log("$i: null")
+//                            }
+//                            else{
+//                                Log("$i: ${timetable.applications[i]!!.id}")
+//                            }
+//                        }
+//
+//                        Log(td.date)
+//                    }
                 }
 
             },
