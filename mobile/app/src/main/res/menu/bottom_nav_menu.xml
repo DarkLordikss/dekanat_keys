@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/bottom_account_circle"
-        android:icon="@drawable/baseline_account_circle_24"
-        android:title="Профиль"/>
 
     <item
-        android:id="@+id/bottom_calender_view"
-        android:icon="@drawable/baseline_calendar_view_day_24"
-        android:title="Расписание"/>
+        android:id="@+id/navigation_dashboard"
+        android:icon="@drawable/baseline_dashboard_24"
+        android:title="@string/title_dashboard" />
 
     <item
-        android:id="@+id/bottom_check_circle"
+        android:id="@+id/navigation_my_application"
         android:icon="@drawable/baseline_check_circle_24"
-        android:title="Мои заявки"/>
+        android:title="@string/title_my_application"/>
 
     <item
-        android:id="@+id/bottom_key"
-        android:icon="@drawable/baseline_key_24"
-        android:title="Ключ"/>
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/baseline_account_circle_24"
+        android:title="@string/title_profile" />
 
 </menu>
