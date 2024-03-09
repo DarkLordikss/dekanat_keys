@@ -8,7 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.core.os.bundleOf
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.liid.dekanatkeys.R
+import com.liid.dekanatkeys.activities.ui.dashboard.DashboardViewModel
 import com.liid.dekanatkeys.databinding.FragmentChooseClassroomBinding
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
@@ -21,22 +27,13 @@ private const val BUILDING_PARAM = "building"
 class ChooseClassroomFragment : Fragment() {
     private var building: String? = null
     private lateinit var binding: FragmentChooseClassroomBinding
-    private lateinit var onDataPassListener :ChooseClassroomFragmentDataPass
     private lateinit var activityContext: Context
+    private val dashboardViewModel: DashboardViewModel by activityViewModels()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activityContext = context
-        onDataPassListener = context as ChooseClassroomFragmentDataPass
     }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            building = it.getString(BUILDING_PARAM)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,8 +47,10 @@ class ChooseClassroomFragment : Fragment() {
 
         binding.classroomListView.setOnItemClickListener { parent, view, position, id ->
             val textView = view as TextView
-            onDataPassListener.onChooseClassroomFragmentDataPass(textView.text.toString())
+            dashboardViewModel.classroom = textView.text.toString()
+            findNavController().navigate(R.id.action_chooseClassroomFragment_to_navigation_dashboard)
         }
+        building = dashboardViewModel.building
         getClassrooms()
     }
 
