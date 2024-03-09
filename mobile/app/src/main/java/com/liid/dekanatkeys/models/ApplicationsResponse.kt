@@ -41,7 +41,7 @@ class TimetableWithDate(@SerializedName("timetable") val timetable: Timetable,
 class Application(@SerializedName("classroom_id") val id: UUID,
                   @SerializedName("name") val name: String,
                   @SerializedName("description") val description: String,
-                  @SerializedName("building") val building: Int,
+                  @SerializedName("buildings") val building: Int,
                   @SerializedName("class_number") val classNumber: Int){
 
 }

@@ -37,7 +37,7 @@ class OKOSheduleItemBooked(context: Context, attrs: AttributeSet?) : OKOSheduleI
 
     fun setApplicationInfo(name:String, description: String, building: Int, classNumber: Int){
         nameTextView.text = name
-        descriptionTextView.text = "рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка рыбалка"
+        descriptionTextView.text = description
         buildingTextView.text = "${building} корпус"
         classNumberTextView.text = "${classNumber} аудитория"
     }

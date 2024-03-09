@@ -33,21 +33,28 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
     private var _binding: FragmentDashboardBinding? = null
     private var building: String? = null
     private var classroom: String? = null
+    private var startDate: LocalDate? = null
+    private var endDate: LocalDate? = null
+
+    private var currentDay = 2
+
     private lateinit var okoDateBar: OKODateBar
     private lateinit var timetableRecycleView : RecyclerView
-    private val dashboardViewModel: DashboardViewModel by activityViewModels()
+    val dashboardViewModel: DashboardViewModel by activityViewModels()
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        building = dashboardViewModel.building
+        classroom = dashboardViewModel.classroom
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log("onCreateView")
-
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -61,6 +68,10 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
         }
         binding.bodyLayout.addView(okoDateBar, 1)
 
+        startDate = okoDateBar.startDate
+        endDate = okoDateBar.endDate
+        dashboardViewModel.currentDay = okoDateBar.activeButtonPos
+
         timetableRecycleView = binding.timetableRecycleView
         timetableRecycleView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -70,13 +81,14 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        building = dashboardViewModel.building
-        classroom = dashboardViewModel.classroom
-
         getApplications()
     }
     private fun getApplications(){
-        val applicationRequest = ApplicationsRequest( building!!.toInt(), LocalDate.parse("2024-02-13"), LocalDate.parse("2024-02-16"), classroom!!.toInt())
+        Log(building.toString())
+        Log(startDate.toString())
+        Log(endDate.toString())
+        Log(classroom.toString())
+        val applicationRequest = ApplicationsRequest( building!!.toInt(), startDate!!, endDate!!, classroom!!.toInt())
 
         OKOApiSingleton.api.fetchApplications(applicationRequest.building,
             applicationRequest.start_date,
@@ -86,33 +98,11 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
             .enqueue(OKOCallback<ApplicationsResponse>(
                 successCallback = {response ->
                     if (response.body() != null){
-                        val timetable = TimetableWithList(response.body()!!.TimetableWithDates[1].timetable)
-                        timetableRecycleView.adapter = TimetableRecycleAdapter(timetable.applications)
-
-//                    for (i in 0 until timetable.applications.size){
-//                            if (timetable.applications[i] == null){
-//                                Log("$i: null")
-//                            }
-//                            else{
-//                                Log("$i: ${timetable.applications[i]!!.id}")
-//                            }
-//                        }
-
-//                    for(td in response.body()!!.TimetableWithDates){
-//
-//                        val timetable = TimetableWithList(td.timetable)
-//                        timetableRecycleView.adapter = TimetableRecycleAdapter(timetable.applications)
-//                        for (i in 0 until timetable.applications.size){
-//                            if (timetable.applications[i] == null){
-//                                Log("$i: null")
-//                            }
-//                            else{
-//                                Log("$i: ${timetable.applications[i]!!.id}")
-//                            }
-//                        }
-//
-//                        Log(td.date)
-//                    }
+                        dashboardViewModel.timetables.clear()
+                        for (timetable in response.body()!!.TimetableWithDates){
+                            dashboardViewModel.timetables.add(TimetableWithList(timetable.timetable))
+                        }
+                        setDay()
                     }
 
                 },
@@ -127,7 +117,23 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
         _binding = null
     }
 
+    private fun setDay(){
+        timetableRecycleView.adapter = TimetableRecycleAdapter(dashboardViewModel.timetables[dashboardViewModel.currentDay].applications)
+    }
+
     override fun setMonth(month: String) {
         binding.monthText.text = month
+    }
+
+    override fun setStartEndDates(start: LocalDate, end: LocalDate, pos: Int) {
+        startDate = start
+        endDate = end
+        dashboardViewModel.currentDay = pos
+        getApplications()
+    }
+
+    override fun dateButtonClicked(pos: Int) {
+        dashboardViewModel.currentDay = pos
+        setDay()
     }
 }
