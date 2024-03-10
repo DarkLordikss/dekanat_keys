@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import LoginPage from './LoginPage';
 import TimetablePage from './TimetablePage';
 import HeaderModule from './HeaderModule';
 import KeysPage from './KeysPage';
 
+import UsersPage from './UsersPage';
 function App() {
   // Получаем текущий путь из URL
   const currentPath = window.location.pathname;
@@ -16,6 +17,9 @@ function App() {
     header = '';
   } else if (currentPath === '/timetable') {
     currentComponent = <TimetablePage />;
+  } else if (currentPath === '/users') {
+    import ('bootstrap/dist/css/bootstrap.min.css');
+    currentComponent = <UsersPage />
   } else if (currentPath === '/keys') {
     currentComponent = <KeysPage />;
   } else {
