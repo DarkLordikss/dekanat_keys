@@ -213,8 +213,8 @@ class ApplicationService:
         return list(keys_dto_dict.values())
 
 
-    # @staticmethod
-    async def show_available_classrooms(self,
+    @staticmethod
+    async def show_available_classrooms(
                                         db: Session,
                                         available_classrooms_showing_dto: AvailableClassroomsShowingDTO
                                         ):
@@ -238,9 +238,6 @@ class ApplicationService:
             'status_key_received': ApplicationStatuses.Key_received.value
         }).fetchall()
 
-        # self.logger.info(f"DEKAT: {query_result} = {db.query(Classroom).count()} * {db.query(Timeslot).count()}")
-        for x in query_result:
-            self.logger.info(f"DEKAT: {x}")
 
         available_classrooms = ApplicationService.fill_timetable_data(query_result)
 
@@ -265,9 +262,8 @@ class ApplicationService:
 
         return formatted_timetable
 
-    #@staticmethod
+    @staticmethod
     async def show_my_applications(
-            self,
             db: Session,
             application_showing_with_status_dto: ApplicationShowingWithStatusDTO
     ):
@@ -287,7 +283,7 @@ class ApplicationService:
             query = query.filter(subquery_statused.c.user_id == application_showing_with_status_dto.user_id)
 
         result_applications = query.all()
-        formatted_timetable = ApplicationService.fill_timetable_data_with_status(self, result_applications)
+        formatted_timetable = ApplicationService.fill_timetable_data_with_status(result_applications)
 
         return formatted_timetable
 
@@ -318,8 +314,8 @@ class ApplicationService:
 
         return formatted_timetable
 
-    #@staticmethod
-    def fill_timetable_data_with_status(self, result_applications):
+    @staticmethod
+    def fill_timetable_data_with_status(result_applications):
         formatted_timetable = {}
         for classroom in result_applications:
             pair = PairWithStatus(
