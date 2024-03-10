@@ -4,6 +4,7 @@ import string
 
 from sqlalchemy.orm import Session
 
+from models.enum.applicationstatuses import ApplicationStatuses
 from models.tables.user import User
 from models.tables.role import Role
 
@@ -58,6 +59,18 @@ class UserService:
                 self.logger.warning(f"(User id getting) No same user found: {_id}")
 
             return user
+        except Exception as e:
+            self.logger.error(f"(User id getting) Error: {e}")
+            raise
+
+    async def get_users(self, db: Session, roles: list[ApplicationStatuses]) -> list[User]:
+        try:
+            users = db \
+                .query(User) \
+                .filter(User.role_id.in_([role.value for role in roles])) \
+                .all()
+
+            return users
         except Exception as e:
             self.logger.error(f"(User id getting) Error: {e}")
             raise
