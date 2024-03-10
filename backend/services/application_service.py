@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 
 from sqlalchemy import or_, and_
 from sqlalchemy.sql import text
+from sqlalchemy.orm import aliased
+
 
 from typing import List
 
@@ -12,12 +14,13 @@ from models.dto.application_create_dto import ApplicationCreateDTO
 from models.dto.available_classrooms_dto import AvailableClassroomsShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
 from models.dto.formatted_application_with_status_dto import PairWithStatus
-from models.dto.formatted_available_classrooms_dto import Classroom_for_pair
+from models.dto.formatted_available_classrooms_dto import ClassroomForPair, ClassroomForPairWithTrack
 from models.enum.applicationstatuses import ApplicationStatuses
 from models.enum.userroles import UserRoles
 from models.tables.application import Application
 from models.tables.classroom import Classroom
 from models.tables.confirm_status import ConfirmStatus
+from models.tables.role import Role
 from models.tables.user import User
 
 from datetime import datetime, timedelta, date
@@ -180,6 +183,38 @@ class ApplicationService:
             self.logger.error(f"(Check correct statuses) Error: {e}")
             raise
 
+    async def track_keys(self, db: Session) -> List[ClassroomForPairWithTrack]:
+        self.logger.info("11111111111111111111111")
+        keys = db.query(Classroom, Application) \
+            .outerjoin(Application, Classroom.id == Application.classroom_id) \
+            .all()
+        self.logger.info("egerhg43hh5454454554h5")
+        keys_dto_dict = {}
+        for key in keys:
+            classroom_id = key[0].id
+            user_id = key[1].user_id if key[1] else None
+            # Проверяем, есть ли уже запись с таким classroom_id
+            if classroom_id in keys_dto_dict:
+                existing_key = keys_dto_dict[classroom_id]
+                # Если у текущей записи user_id не пустое, заменяем старую запись
+                if user_id:
+                    keys_dto_dict[classroom_id] = ClassroomForPairWithTrack(
+                        classroom_id=classroom_id,
+                        buildings=key[0].building,
+                        class_number=key[0].number,
+                        user_id=user_id
+                    )
+            else:
+                keys_dto_dict[classroom_id] = ClassroomForPairWithTrack(
+                    classroom_id=classroom_id,
+                    buildings=key[0].building,
+                    class_number=key[0].number,
+                    user_id=user_id
+                )
+        # Возвращаем значения словаря в виде списка
+        return list(keys_dto_dict.values())
+
+
     # @staticmethod
     async def show_available_classrooms(self,
                                         db: Session,
@@ -218,7 +253,7 @@ class ApplicationService:
         formatted_timetable = {}
 
         for element in result_classrooms:
-            pair = Classroom_for_pair(
+            pair = ClassroomForPair(
                 classroom_id=element[0],
                 buildings=element.building,
                 class_number=element.number
