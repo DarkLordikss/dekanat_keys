@@ -43,7 +43,7 @@ button {
     border-radius: 0;
 }
 
-input {
+input:not(#checkbox-1, #checkbox-2) {
     min-height: 40px;
     background-color: var(--back-color);
     border: 0;
