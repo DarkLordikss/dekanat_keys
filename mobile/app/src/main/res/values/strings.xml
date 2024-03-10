@@ -29,6 +29,7 @@
     <string name="SP_name">"OKOPrefs"</string>
     <string name="jwtTokenName">"jwtToken"</string>
     <string name="roleName">"role"</string>
+    <string name="userId">"userId"</string>
     <string name="Api">"https://zomnbi-mozgi-kushat-iii-backend.pmc-python.ru/api/v1/"</string>
     <string name="LogTag">"OKOTag"</string>
     <string name="title_activity_registration">RegistrationActivity</string>

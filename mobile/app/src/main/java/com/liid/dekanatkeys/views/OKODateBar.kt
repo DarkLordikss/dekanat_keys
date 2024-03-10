@@ -73,9 +73,9 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
             scaleY = 1.5f
             setOnClickListener{
                 dashboardViewModel.weekOffset++
-                setDatesToButtons()
                 dashboardViewModel.currentDayPos = 0
-                parentFragment.setStartEndDates(startDate, endDate, dashboardViewModel.currentDayPos)
+                setDatesToButtons()
+                parentFragment.setStartEndDates(startDate, endDate)
             }
         }
         prevImageButton = ImageButton(context).apply {
@@ -87,9 +87,9 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
             scaleY = 1.5f
             setOnClickListener{
                 dashboardViewModel.weekOffset--
-                setDatesToButtons()
                 dashboardViewModel.currentDayPos = 0
-                parentFragment.setStartEndDates(startDate, endDate, dashboardViewModel.currentDayPos)
+                setDatesToButtons()
+                parentFragment.setStartEndDates(startDate, endDate)
             }
         }
 
@@ -112,6 +112,9 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
 
         for (i in 0 until dates.size){
             dayButtons[i].setDate(dates[i])
+            if (dates[i] == currDate){
+                dashboardViewModel.currentDayPos = i
+            }
         }
 
         setActive(dayButtons[dashboardViewModel.currentDayPos])
@@ -125,7 +128,7 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
         activeButton = btn
         dashboardViewModel.currentDayPos = dayButtons.indexOf(activeButton)
         dashboardViewModel.currentDate = startDate.plusDays(dashboardViewModel.currentDayPos.toLong())
-        Log(dashboardViewModel.currentDate.toString())
+//        Log("dashboardViewModel.currentDate: " + dashboardViewModel.currentDayPos.toString())
         parentFragment.setMonth(mouthNames[activeButton.getDate().monthValue-1])
     }
 
