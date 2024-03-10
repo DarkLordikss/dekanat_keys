@@ -34,6 +34,7 @@ class ApplicationService:
             self,
             user_id,
             application_dto: ApplicationCreateDTO,
+            group_id,
             db: Session
     ):
         try:
@@ -43,6 +44,7 @@ class ApplicationService:
                 application_status_id=ApplicationStatuses.Not_processed.value,
                 application_date=datetime.utcnow() + timedelta(hours=7),
                 name=application_dto.name,
+                application_group_id=group_id,
                 description=application_dto.description,
                 class_date=application_dto.class_date,
                 time_table_id=application_dto.time_table_id
@@ -306,40 +308,36 @@ class ApplicationService:
 
     async def change_application_status(self, db: Session, application_id: str, user: User, new_status: int):
         try:
-            application = db.query(Application).filter(Application.id == application_id).first()
+            app = await self.get_application_by_id(db, application_id)
+            applications = db.query(Application).filter(Application.application_group_id == app.application_group_id).all()
 
-            if not application:
-                raise FileNotFoundError
+            for application in applications:
+                if user.role_id != UserRoles.Dean_office_employee.value:
+                    raise PermissionError
 
-            if user.role_id != UserRoles.Dean_office_employee.value:
-                raise PermissionError
+                if new_status <= application.application_status_id or new_status > len(ApplicationStatuses):
+                    raise KeyError
 
-            if new_status <= application.application_status_id or new_status > len(ApplicationStatuses):
-                raise KeyError
-
-            application.application_status_id = new_status
-            db.commit()
-
-            if (new_status is ApplicationStatuses.Confirmed.value or
-                    new_status is ApplicationStatuses.Key_received.value):
-                other_applications = db.query(Application).filter(
-                    (Application.class_date == application.class_date) &
-                    (Application.time_table_id == application.time_table_id) &
-                    (Application.classroom_id == application.classroom_id)
-                ).all()
-
-                for other_application in other_applications:
-                    if other_application.id != application.id:
-                        other_application.application_status_id = ApplicationStatuses.Rejected.value
-
+                application.application_status_id = new_status
                 db.commit()
 
-            self.logger.info(f"(Change application status) Application status with id {application_id} updated "
-                             f"successfully")
+                if (new_status is ApplicationStatuses.Confirmed.value or
+                        new_status is ApplicationStatuses.Key_received.value):
+                    other_applications = db.query(Application).filter(
+                        (Application.class_date == application.class_date) &
+                        (Application.time_table_id == application.time_table_id) &
+                        (Application.classroom_id == application.classroom_id)
+                    ).all()
+
+                    for other_application in other_applications:
+                        if other_application.id != application.id:
+                            other_application.application_status_id = ApplicationStatuses.Rejected.value
+
+                    db.commit()
+
+                self.logger.info(f"(Change application status) Application status with id {application_id} updated "
+                                 f"successfully")
             return application_id
-        except FileNotFoundError:
-            self.logger.warning(f"(Change application status) Application with id {application_id} not found")
-            raise
         except PermissionError:
             self.logger.warning(f"(Change application status) User with id {user.id} has no permission for this "
                                 f"application")
@@ -349,4 +347,20 @@ class ApplicationService:
             raise
         except Exception as e:
             self.logger.error(f"(Change application status)  Error: {e}")
+            raise
+
+    async def get_application_by_id(self, db: Session, application_id: str):
+        try:
+            application = db.query(Application).filter(Application.id == application_id).first()
+
+            if not application:
+                raise FileNotFoundError
+
+            return application
+
+        except FileNotFoundError:
+            self.logger.warning(f"(Get application by id) Application with id {application_id} not found")
+            raise
+        except Exception as e:
+            self.logger.error(f"(Get application by id)  Error: {e}")
             raise

@@ -10,7 +10,7 @@ class Application(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     user_id = Column(UUID(as_uuid=True), nullable=False)
     classroom_id = Column(UUID(as_uuid=True), nullable=False)
-    #schedule_element_id = Column(UUID(as_uuid=True), nullable=False)
+    application_group_id = Column(UUID(as_uuid=True), nullable=False)
     application_status_id = Column(Integer, nullable=False)
     application_date = Column(DateTime, nullable=False)
     name = Column(String, nullable=False)

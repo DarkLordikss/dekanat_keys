@@ -1,5 +1,6 @@
 import json
 import logging
+import uuid
 from uuid import UUID
 
 import jwt
@@ -121,12 +122,14 @@ async def create_application(
             )):
                 raise HTTPException(status_code=403, detail="You has already occupied this classroom")
 
+        group_id = uuid.uuid4()
+
         for i in range(application_create_dto.dublicates):
             copy_application_dto = application_create_dto.copy()
             copy_application_dto.class_date = (application_create_dto.class_date +
                                                timedelta(days=config.ONE_WEEK) * i)
 
-            await application_service.create_application(user.id, copy_application_dto, db)
+            await application_service.create_application(user.id, copy_application_dto, group_id, db)
 
         return MessageDTO(message="Application added!")
 
