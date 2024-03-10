@@ -4,42 +4,39 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.liid.dekanatkeys.R
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.liid.dekanatkeys.databinding.FragmentMyApplicationBinding
+import com.liid.dekanatkeys.views.ApplicationRecicleAdapter
 
 class MyApplicationFragment : Fragment() {
 
-    private var _binding: FragmentMyApplicationBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentMyApplicationBinding
+    private lateinit var myApplicationRecyclerView : RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val myApplicationViewModel =
-            ViewModelProvider(this).get(MyApplicationViewModel::class.java)
+        binding = FragmentMyApplicationBinding.inflate(inflater, container, false)
 
-        _binding = FragmentMyApplicationBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        myApplicationRecyclerView = binding.applicationRecycleView
+        myApplicationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val textView: TextView = binding.textMyApplication
-        myApplicationViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+
         findNavController().navigate(R.id.action_navigation_my_application_to_usersFragment)
-        return root
+
+//        val adapter = ApplicationRecicleAdapter(applicationList, this)
+//        myApplicationRecyclerView.adapter = adapter
+
+
+        return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+
 }
