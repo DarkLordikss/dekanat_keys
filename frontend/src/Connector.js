@@ -1,4 +1,4 @@
-import { getStatusString, parseDate, getBarriers, parseSmallDate, getStatusStyle} from "./Parsers.js";
+import { getStatusString, parseDate, getBarriers, parseSmallDate, getStatusStyle} from "./Parsers.js";import {useState} from "react";
 
 const default_way = 'https://zomnbi-mozgi-kushat-iii-backend.pmc-python.ru/api/v1/';
 
@@ -229,5 +229,49 @@ export async function changeApplicationStatus(app_id, status_id, token) {
         return data;
     } catch (error) {
         console.error('Error:', error.message);
+    }
+}
+
+export async function getUsers(user, token) {
+    try {
+        const response = await fetch(`${default_way}user/users?roles=1&roles=2`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+        console.log(response)
+        if (!response.ok) {
+            if (response.status === 400) {
+                alert(`Произошла ошибка!\nСписок пуст"`)
+            }
+            else if (response.status === 403) {
+                window.location.href = '/'
+            }
+            else if (response.status === 500) {
+                alert('Произошла ошибка!\nОшибка на сервере!')
+            }
+            return null;
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}
+
+export const updateRole = async (id, role, selectedValue) => {
+    try {
+        await fetch(`${default_way}user/change_role/?another_user_id=${id}&wished_role_id=${selectedValue}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("keyGuardUserToken")}`,
+            },
+        });
+
+    } catch (error) {
+        console.error('Ошибка:', error);
     }
 }
