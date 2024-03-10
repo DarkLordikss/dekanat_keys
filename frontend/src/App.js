@@ -2,6 +2,7 @@ import React from 'react';
 import LoginPage from './LoginPage';
 import TimetablePage from './TimetablePage';
 import HeaderModule from './HeaderModule';
+import KeysPage from './KeysPage';
 
 function App() {
   // Получаем текущий путь из URL
@@ -15,6 +16,8 @@ function App() {
     header = '';
   } else if (currentPath === '/timetable') {
     currentComponent = <TimetablePage />;
+  } else if (currentPath === '/keys') {
+    currentComponent = <KeysPage />;
   } else {
     // Если путь не соответствует ни одному известному, можно отобразить страницу 404
     currentComponent = <div>404 Not Found</div>;

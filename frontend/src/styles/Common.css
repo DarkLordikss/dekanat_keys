@@ -164,6 +164,29 @@ select:active {
     border-radius: 3px;
 }
 
+.box-border-r {
+    border-right: 1px solid var(--borders-color);
+    border-radius: 3px;
+}
+.box-border-l {
+    border-left: 1px solid var(--borders-color);
+    border-radius: 3px;
+}
+
+.no-radius {
+    border-radius: 0;
+}
+
+.radius-l {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+.radius-r {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+
 .filling-box {
     width: 100%;
     height: 100%;
