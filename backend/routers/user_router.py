@@ -342,11 +342,11 @@ async def change_role(
 
         user = await user_service.get_user_by_id(db, (await token_data)["sub"])
 
-        if user.role_id != UserRoles.Dean_office_employee:
+        if user.role_id != UserRoles.Dean_office_employee.value:
             logger.warning(f"(Change role) You can't do this with role_id: {user.role_id}")
             raise HTTPException(status_code=403, detail="You're not dean's office")
 
-        if wished_role_id == UserRoles.Dean_office_employee:
+        if wished_role_id == UserRoles.Dean_office_employee.value:
             logger.warning(f"(Change role) You can't make dean's office: {user.role_id}")
             raise HTTPException(status_code=403, detail="3 is dean's role")
 
