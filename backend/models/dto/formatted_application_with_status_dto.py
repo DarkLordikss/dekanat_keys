@@ -7,6 +7,7 @@ from models.enum.applicationstatuses import ApplicationStatuses
 
 
 class PairWithStatus(BaseModel):
+    application_id: UUID
     classroom_id: UUID
     status: ApplicationStatuses
     name: str

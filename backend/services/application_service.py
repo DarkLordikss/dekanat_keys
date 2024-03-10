@@ -184,19 +184,17 @@ class ApplicationService:
             raise
 
     async def track_keys(self, db: Session) -> List[ClassroomForPairWithTrack]:
-        self.logger.info("11111111111111111111111")
         keys = db.query(Classroom, Application) \
             .outerjoin(Application, Classroom.id == Application.classroom_id) \
             .all()
-        self.logger.info("egerhg43hh5454454554h5")
+
         keys_dto_dict = {}
+
         for key in keys:
             classroom_id = key[0].id
             user_id = key[1].user_id if key[1] else None
-            # Проверяем, есть ли уже запись с таким classroom_id
+
             if classroom_id in keys_dto_dict:
-                existing_key = keys_dto_dict[classroom_id]
-                # Если у текущей записи user_id не пустое, заменяем старую запись
                 if user_id:
                     keys_dto_dict[classroom_id] = ClassroomForPairWithTrack(
                         classroom_id=classroom_id,
@@ -211,7 +209,7 @@ class ApplicationService:
                     class_number=key[0].number,
                     user_id=user_id
                 )
-        # Возвращаем значения словаря в виде списка
+
         return list(keys_dto_dict.values())
 
 
@@ -267,8 +265,9 @@ class ApplicationService:
 
         return formatted_timetable
 
-    @staticmethod
+    #@staticmethod
     async def show_my_applications(
+            self,
             db: Session,
             application_showing_with_status_dto: ApplicationShowingWithStatusDTO
     ):
@@ -288,7 +287,7 @@ class ApplicationService:
             query = query.filter(subquery_statused.c.user_id == application_showing_with_status_dto.user_id)
 
         result_applications = query.all()
-        formatted_timetable = ApplicationService.fill_timetable_data_with_status(result_applications)
+        formatted_timetable = ApplicationService.fill_timetable_data_with_status(self, result_applications)
 
         return formatted_timetable
 
@@ -319,13 +318,13 @@ class ApplicationService:
 
         return formatted_timetable
 
-    @staticmethod
-    def fill_timetable_data_with_status(result_applications):
+    #@staticmethod
+    def fill_timetable_data_with_status(self, result_applications):
         formatted_timetable = {}
-
         for classroom in result_applications:
             pair = PairWithStatus(
-                classroom_id=classroom.id,
+                application_id=classroom[1],
+                classroom_id=classroom[3],
                 status=classroom.application_status_id,
                 name=classroom.name,
                 description=classroom.description,
