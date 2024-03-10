@@ -67,12 +67,12 @@ class UserService:
         try:
             users = db \
                 .query(User) \
-                .filter(User.role_id.in_([role.value for role in roles])) \
+                .filter(User.role_id.in_([role for role in roles])) \
                 .all()
 
             return users
         except Exception as e:
-            self.logger.error(f"(User id getting) Error: {e}")
+            self.logger.error(f"(Users is getting) Error: {e}")
             raise
 
     async def get_user_by_secret_key(self, db: Session, _key: str) -> User:
@@ -147,4 +147,18 @@ class UserService:
 
         except Exception as e:
             self.logger.error(f"(Checking user existence) Error: {e}")
+            raise
+
+    async def change_user_role(self, db: Session, role: int, user_id: str) -> str:
+        try:
+            self.logger.info(f"МЫЫЫЫ ТУУУТ")
+            user = db.query(User).filter(User.id == user_id).first()
+            prev_role = user.role_id
+            user.role_id = role
+            self.logger.info(f"ААААААУУУУ {user.id} == {user_id}")
+            db.commit()
+
+            return str(f"change role on {role} user: {user.full_name} with previous role {prev_role}")
+        except Exception as e:
+            self.logger.error(f"(Role id changing) Error: {e}")
             raise
