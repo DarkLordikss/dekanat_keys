@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import HTTPException, Depends, APIRouter
+from fastapi import HTTPException, Depends, APIRouter, Query
 
 import jwt
 
@@ -243,4 +243,61 @@ async def logout(access_token: str = Depends(oauth2_scheme),
         raise
     except Exception as e:
         logger.error(f"(Login) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@user_router.get(
+    "/users",
+    tags=[config.SWAGGER_GROUPS["user"]],
+    response_model=list[UserProfileDTO],
+    responses={
+        200: {
+            "model": list[UserProfileDTO]
+
+        },
+        401: {
+            "model": ErrorDTO
+        },
+        403: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def get_users(
+                    roles: list[int] = Query(),
+                    access_token: str = Depends(oauth2_scheme),
+                    db: Session = Depends(get_db),
+                    user_service: UserService = Depends(UserService),
+                    auth_service: AuthService = Depends(AuthService)
+                    ):
+    try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Get user profile) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+
+        users = await user_service.get_users(db, roles)
+
+        logger.info(f"(Get users profiles) Successful get profiles with roles: {roles}")
+
+        users_dto = []
+
+        for user in users:
+            users_dto.append(
+                UserProfileDTO(
+                    email=user.email,
+                    full_name=user.full_name,
+                    role=(await user_service.get_role_by_id(db, user.role_id)).name
+                )
+            )
+
+        return users_dto
+    except jwt.PyJWTError as e:
+        logger.warning(f"(Get users profiles) Bad token: {e}")
+        raise HTTPException(status_code=403, detail="Bad token")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Get user profile) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
