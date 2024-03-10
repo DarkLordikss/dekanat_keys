@@ -19,7 +19,7 @@ class DashboardViewModel : ViewModel() {
 
     var timetables = mutableListOf<TimetableWithList>()
     var currentDayPos = 0
-    var weekOffset = -3L
+    var weekOffset = 0L
 
     var classroomId: String? = null
     var name : String? = null

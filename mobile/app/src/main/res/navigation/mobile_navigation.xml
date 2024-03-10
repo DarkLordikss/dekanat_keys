@@ -19,7 +19,11 @@
         android:id="@+id/navigation_my_application"
         android:name="com.liid.dekanatkeys.activities.ui.myApplication.MyApplicationFragment"
         android:label="@string/title_my_application"
-        tools:layout="@layout/fragment_my_application" />
+        tools:layout="@layout/fragment_my_application" >
+        <action
+            android:id="@+id/action_navigation_my_application_to_usersFragment"
+            app:destination="@id/usersFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"
@@ -53,6 +57,11 @@
             android:id="@+id/action_createApplicationFragment_to_navigation_my_application"
             app:destination="@id/navigation_my_application" />
     </fragment>
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="com.liid.dekanatkeys.fragments.UsersFragment"
+        android:label="fragment_users"
+        tools:layout="@layout/fragment_users" />
 
 
 </navigation>

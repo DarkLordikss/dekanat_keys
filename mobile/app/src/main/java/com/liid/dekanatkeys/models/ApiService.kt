@@ -4,11 +4,11 @@ import com.liid.dekanatkeys.models.user.LoginRequest
 import com.liid.dekanatkeys.models.user.LoginResponse
 import com.liid.dekanatkeys.models.user.RegistrationRequest
 import com.liid.dekanatkeys.models.user.RegistrationResponse
+import com.liid.dekanatkeys.models.user.UserInfo
 import com.liid.dekanatkeys.models.user.UserProfile
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.HTTP
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -34,5 +34,8 @@ interface ApiService {
                           @Query("classrooms") classrooms: List<Int>): Call<ApplicationsResponse>
     @POST("applications/create/")
     fun createApplication(@Body request: CreateApplicationRequest, @Header("Authorization") token: String): Call<CreateApplicationResponse>
+
+    @GET("user/users/")
+    fun fetchUsers(@Query("roles") roles: List<Int>, @Header("Authorization") token: String): Call<List<UserInfo>>
 
 }

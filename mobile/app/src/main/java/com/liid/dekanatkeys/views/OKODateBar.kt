@@ -32,7 +32,7 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
     private val dashboardViewModel: DashboardViewModel = (parentFragment as DashboardFragment).dashboardViewModel
 
     init {
-        dayButtons = List(7) { index ->
+        dayButtons = List(6) { index ->
             val button = OKODayButton(context, null)
             button.setOnClickListener{it ->
                 val btn = it as OKODayButton
@@ -115,11 +115,6 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
         }
 
         setActive(dayButtons[dashboardViewModel.currentDayPos])
-//        for (i in 0 until dates.size){
-//            if(dates[i] == currDate){
-//                setActive(dayButtons[i])
-//            }
-//        }
     }
 
     private fun setActive(btn: OKODayButton){
@@ -130,17 +125,18 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
         activeButton = btn
         dashboardViewModel.currentDayPos = dayButtons.indexOf(activeButton)
         dashboardViewModel.currentDate = startDate.plusDays(dashboardViewModel.currentDayPos.toLong())
+        Log(dashboardViewModel.currentDate.toString())
         parentFragment.setMonth(mouthNames[activeButton.getDate().monthValue-1])
     }
 
     private fun getDaysOfWeek(offset: Long) : MutableList<LocalDate>{
         val dates = mutableListOf<LocalDate>()
-        val currentDay = LocalDate.now().plusDays(offset * 7)
+        val currentDay = LocalDate.now().plusDays(offset * 6)
 
         val currentDayOfWeek = currentDay.dayOfWeek.ordinal
         val mondayIndex = - currentDayOfWeek
         var di = mondayIndex.toLong()
-        for (i in 0..6 ){
+        for (i in 0..5 ){
             dates.add(currentDay.plusDays(di))
             di++
         }
