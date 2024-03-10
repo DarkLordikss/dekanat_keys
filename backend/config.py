@@ -206,4 +206,5 @@ SWAGGER_GROUPS = {
     "application": "Application",
     "building": "Building",
     "user": "User",
+    "status": "Status"
 }
