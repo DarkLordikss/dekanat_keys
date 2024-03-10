@@ -59,7 +59,7 @@ services:
       - env/backend.env
     restart: always
     ports:
-      - 3222:8000
+      - 3223:8000
     networks:
       - default
 
