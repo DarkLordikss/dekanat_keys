@@ -57,9 +57,6 @@ async def websocket_endpoint(
     await websocket.accept()
     logger.info(f"PISYA POPA KAKA")
     client_sockets[user_id] = websocket
-    db_user = ConnectedUser(id=user_id, websocket_id=id(websocket))
-    db.add(db_user)
-    db.commit()
     try:
 
 
@@ -80,8 +77,6 @@ async def websocket_endpoint(
 
             if data : await websocket_service.change_application_owner(db, user_sender_id, user_id, application_id, answer)
     except WebSocketDisconnect:
-        # Удаляем запись из базы данных при отключении пользователя
-        db.query(ConnectedUser).filter(ConnectedUser.id == user_id).delete()
-        db.commit()
+        client_sockets.remove(websocket)
 
 
