@@ -1,14 +1,18 @@
 package com.liid.dekanatkeys.views
 
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.liid.dekanatkeys.R
+import com.liid.dekanatkeys.activities.ui.dashboard.DashboardFragment
+import com.liid.dekanatkeys.activities.ui.dashboard.DashboardViewModel
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.models.Application
 import com.liid.dekanatkeys.views.sheduleItem.OKOSheduleItem
 import com.liid.dekanatkeys.views.sheduleItem.OKOSheduleItemBooked
 import com.liid.dekanatkeys.views.sheduleItem.OKOSheduleItemFree
 
-class TimetableRecycleAdapter(private val applications: List<Application?>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class TimetableRecycleAdapter(private val applications: List<Application?>, private val parentFragment: DashboardFragment) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val VIEW_TYPE_FREE = 0
     private val VIEW_TYPE_BOOKED = 1
@@ -48,6 +52,10 @@ class TimetableRecycleAdapter(private val applications: List<Application?>) : Re
             is TimetableViewHolderFree -> {
                 val item = (holder as TimetableViewHolderFree).itemView as OKOSheduleItemFree
                 item.setLessonNumber(position + 1)
+                item.setOnClickListener{it ->
+                    parentFragment.dashboardViewModel.lessonNumber = (it as OKOSheduleItemFree).getLessonNumber()
+                    parentFragment.findNavController().navigate(R.id.action_navigation_dashboard_to_createApplicationFragment)
+                }
             }
             is TimetableViewHolderBooked -> {
                 val item = (holder as TimetableViewHolderBooked).itemView as OKOSheduleItemBooked

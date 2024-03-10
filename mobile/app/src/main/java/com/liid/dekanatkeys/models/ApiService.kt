@@ -26,12 +26,13 @@ interface ApiService {
     @GET("building/get-classrooms-from-building")
     fun fetchClassrooms(@Query("building") building:Int): Call<ClassroomResponse>
 
-//    @HTTP(method = "GET", path = "applications/show_with_status", hasBody = true)
     @GET("applications/show_with_status")
     fun fetchApplications(@Query("building") building: Int,
                           @Query("start_date") start_date : LocalDate,
                           @Query("end_date") end_date : LocalDate,
                           @Query("statuses") statuses: List<Int>,
                           @Query("classrooms") classrooms: List<Int>): Call<ApplicationsResponse>
+    @POST("applications/create/")
+    fun createApplication(@Body request: CreateApplicationRequest, @Header("Authorization") token: String): Call<CreateApplicationResponse>
 
 }

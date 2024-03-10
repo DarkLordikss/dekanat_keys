@@ -5,17 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.liid.dekanatkeys.R
 import com.liid.dekanatkeys.databinding.FragmentDashboardBinding
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
@@ -35,8 +29,6 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
     private var classroom: String? = null
     private var startDate: LocalDate? = null
     private var endDate: LocalDate? = null
-
-    private var currentDay = 2
 
     private lateinit var okoDateBar: OKODateBar
     private lateinit var timetableRecycleView : RecyclerView
@@ -70,7 +62,6 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
 
         startDate = okoDateBar.startDate
         endDate = okoDateBar.endDate
-        dashboardViewModel.currentDay = okoDateBar.activeButtonPos
 
         timetableRecycleView = binding.timetableRecycleView
         timetableRecycleView.layoutManager = LinearLayoutManager(requireContext())
@@ -84,10 +75,6 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
         getApplications()
     }
     private fun getApplications(){
-        Log(building.toString())
-        Log(startDate.toString())
-        Log(endDate.toString())
-        Log(classroom.toString())
         val applicationRequest = ApplicationsRequest( building!!.toInt(), startDate!!, endDate!!, classroom!!.toInt())
 
         OKOApiSingleton.api.fetchApplications(applicationRequest.building,
@@ -118,7 +105,7 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
     }
 
     private fun setDay(){
-        timetableRecycleView.adapter = TimetableRecycleAdapter(dashboardViewModel.timetables[dashboardViewModel.currentDay].applications)
+        timetableRecycleView.adapter = TimetableRecycleAdapter(dashboardViewModel.timetables[dashboardViewModel.currentDayPos].applications, this)
     }
 
     override fun setMonth(month: String) {
@@ -128,12 +115,11 @@ class DashboardFragment : Fragment(), OKODateBarInteraction {
     override fun setStartEndDates(start: LocalDate, end: LocalDate, pos: Int) {
         startDate = start
         endDate = end
-        dashboardViewModel.currentDay = pos
         getApplications()
     }
 
     override fun dateButtonClicked(pos: Int) {
-        dashboardViewModel.currentDay = pos
+        dashboardViewModel.currentDayPos = pos
         setDay()
     }
 }

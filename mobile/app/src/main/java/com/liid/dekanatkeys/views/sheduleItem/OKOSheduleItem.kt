@@ -61,4 +61,7 @@ open class OKOSheduleItem (context: Context, attrs: AttributeSet?) : LinearLayou
         lessonTextView.text = lessonNumber.toString() + "-ая пара"
     }
 
+    fun getLessonNumber():Int{
+        return lessonNumber
+    }
 }

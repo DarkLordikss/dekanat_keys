@@ -29,6 +29,7 @@ class ChooseClassroomFragment : Fragment() {
     private lateinit var binding: FragmentChooseClassroomBinding
     private lateinit var activityContext: Context
     private val dashboardViewModel: DashboardViewModel by activityViewModels()
+    private val classroomId = mutableMapOf<String, String>()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -48,6 +49,7 @@ class ChooseClassroomFragment : Fragment() {
         binding.classroomListView.setOnItemClickListener { parent, view, position, id ->
             val textView = view as TextView
             dashboardViewModel.classroom = textView.text.toString()
+            dashboardViewModel.classroomId = classroomId[dashboardViewModel.classroom]
             findNavController().navigate(R.id.action_chooseClassroomFragment_to_navigation_dashboard)
         }
         building = dashboardViewModel.building
@@ -68,6 +70,9 @@ class ChooseClassroomFragment : Fragment() {
             OKOApiSingleton.api.fetchClassrooms(it.toInt()).enqueue(OKOCallback<ClassroomResponse>(
                 successCallback = {response ->
                     if (response.body() != null) {
+                        for (c in response.body()!!.classrooms){
+                            classroomId[c.number] = c.id
+                        }
                         val classroomNumbers = response.body()!!.classrooms.map { it.number }
                         fillList(classroomNumbers)
                     } else binding.root.removeView(binding.classroomListView)
@@ -80,13 +85,4 @@ class ChooseClassroomFragment : Fragment() {
         }
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(building: String) =
-            ChooseClassroomFragment().apply {
-                arguments = Bundle().apply {
-                    putString(BUILDING_PARAM, building)
-                }
-            }
-    }
 }

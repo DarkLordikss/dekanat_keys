@@ -10,6 +10,9 @@
         android:name="com.liid.dekanatkeys.activities.ui.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard">
+        <action
+            android:id="@+id/action_navigation_dashboard_to_createApplicationFragment"
+            app:destination="@id/createApplicationFragment" />
     </fragment>
 
     <fragment
@@ -40,6 +43,15 @@
         <action
             android:id="@+id/action_chooseClassroomFragment_to_navigation_dashboard"
             app:destination="@id/navigation_dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/createApplicationFragment"
+        android:name="com.liid.dekanatkeys.fragments.CreateApplicationFragment"
+        android:label="@string/title_create_application"
+        tools:layout="@layout/fragment_create_application" >
+        <action
+            android:id="@+id/action_createApplicationFragment_to_navigation_my_application"
+            app:destination="@id/navigation_my_application" />
     </fragment>
 
 
