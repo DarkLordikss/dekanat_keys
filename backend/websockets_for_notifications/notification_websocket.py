@@ -77,6 +77,7 @@ async def websocket_endpoint(
 
             if data : await websocket_service.change_application_owner(db, user_sender_id, user_id, application_id, answer)
     except WebSocketDisconnect:
-        client_sockets.remove(websocket)
+        ##client_sockets.remove(websocket)
+        del client_sockets[websocket]
 
 
