@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class StatusDTO(BaseModel):
+class EnumDTO(BaseModel):
     id: int
     name: str
 

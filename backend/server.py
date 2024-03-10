@@ -11,6 +11,7 @@ from routers.test_router import test_router
 from routers.user_router import user_router
 from routers.building_router import building_router
 from routers.status_router import status_router
+from routers.role_router import role_router
 
 from storage.storage_init import init_db
 
@@ -30,6 +31,7 @@ router.include_router(classroom_router)
 router.include_router(application_router)
 router.include_router(building_router)
 router.include_router(status_router)
+router.include_router(role_router)
 
 
 app = FastAPI()

@@ -72,11 +72,13 @@ async def websocket_endpoint(
             # user_recipient_id = data["recipient_id"]
             # application_id = data["application_id"]
             # answer = data["answer"]
-            application_id, user_recipient_id, user_sender_id, answer_str = data.split(":")
+            application_id, user_sender_id, answer_str = data.split(":")
             answer = bool(answer_str)
-            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAa   ", application_id, user_recipient_id, user_sender_id, answer)
+            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAa   ", application_id, user_sender_id, answer)
+            logger.info(f"SEND_ID   {user_sender_id}")
+            logger.info(f"USER_ID   {user_id}")
 
-            if data : await websocket_service.change_application_owner(db, user_id, user_recipient_id, application_id, answer)
+            if data : await websocket_service.change_application_owner(db, user_sender_id, user_id, application_id, answer)
     except WebSocketDisconnect:
         # Удаляем запись из базы данных при отключении пользователя
         db.query(ConnectedUser).filter(ConnectedUser.id == user_id).delete()

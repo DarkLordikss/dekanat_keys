@@ -10,18 +10,19 @@ from models.dto.error_dto import ErrorDTO
 from models.dto.enums_dto import EnumsDTO
 
 from services.classroom_service import ClassroomService
+from services.role_service import RoleService
 from services.status_service import StatusService
 from storage.db_config import get_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-status_router = APIRouter(prefix="/status")
+role_router = APIRouter(prefix="/role")
 
 
-@status_router.get(
+@role_router.get(
     "/all",
-    tags=[config.SWAGGER_GROUPS["status"]],
+    tags=[config.SWAGGER_GROUPS["role"]],
     response_model=EnumsDTO,
     responses={
         200: {
@@ -32,11 +33,11 @@ status_router = APIRouter(prefix="/status")
         }
     }
 )
-async def get_statuses(db: Session = Depends(get_db),
-                         status_service: StatusService = Depends(StatusService)
+async def get_roles(db: Session = Depends(get_db),
+                         role_service: RoleService = Depends(RoleService)
                          ):
     try:
-        statuses = await status_service.get_all_statuses(db)
+        statuses = await role_service.get_all_roles(db)
         logger.info(f"(Get all statuses) Successful get statuses, len: {len(statuses)}")
 
         return EnumsDTO(statuses=statuses)

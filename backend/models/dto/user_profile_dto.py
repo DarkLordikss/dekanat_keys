@@ -3,6 +3,7 @@ from uuid import UUID
 
 
 class UserProfileDTO(BaseModel):
+    id: UUID
     full_name: str
     email: EmailStr
     role: str
