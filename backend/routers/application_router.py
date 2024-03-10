@@ -7,6 +7,8 @@ import jwt
 from fastapi import APIRouter, HTTPException, Depends, Query, WebSocket
 from sqlalchemy.orm import Session
 from datetime import timedelta, date
+from typing import List, Optional
+
 
 from models.dto.application_create_dto import ApplicationCreateDTO
 from models.dto.available_classrooms_dto import AvailableClassroomsShowingDTO
@@ -299,6 +301,101 @@ async def show_applications_with_status(
 
             timetables.append(
                 application_service.show_applications_with_status(db, application_showing_with_status_dto
+                                                                  ))
+
+            daily_applications = DayWithStatus(
+                date=current_date,
+                timetable={}
+            )
+
+            schedule.append(daily_applications)
+            current_date += timedelta(days=1)
+
+        for index in range(len(schedule)):
+            schedule[index].timetable = await timetables[index]
+
+        return FormattedTimetableWithStatus(schedule=schedule)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Application) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@application_router.get(
+    "/show_my/",
+    tags=[config.SWAGGER_GROUPS["application"]],
+    response_model=FormattedTimetableWithStatus,
+    responses={
+        200: {
+            "model": FormattedTimetableWithStatus
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def show_my_applications(
+        start_date: date,
+        end_date: date = None,
+        statuses: list[int] = Query(),
+        db: Session = Depends(get_db),
+        access_token: str = Depends(config.oauth2_scheme),
+        application_service: ApplicationService = Depends(ApplicationService),
+        classroom_service: ClassroomService = Depends(ClassroomService),
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
+        auth_service: AuthService = Depends(ApplicationService),
+        user_service: UserService = Depends(UserService)
+):
+    try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Change deal status) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+
+        token_data = auth_service.get_data_from_access_token(access_token)
+        user = await user_service.get_user_by_id(db, (await token_data)["sub"])
+        user_id = user.id
+
+        if not end_date:
+            end_date = start_date
+
+        timetables = []
+        schedule = []
+        current_date = start_date
+
+        if await application_service.check_correct_statuses(db, statuses):
+            raise HTTPException(status_code=404, detail="statuses not found")
+
+        if await entity_verifier_service.check_correct_dates(start_date, end_date):
+            raise HTTPException(status_code=400, detail="invalid date")
+
+
+        if await entity_verifier_service.check_existence(
+                db,
+                User,
+                User.id == user_id,
+                f"(Check user existence) user with id {user_id} exists",
+                f"(Check user existence) user with id {user_id} not found",
+                user_id_func=user_id
+        ) and user_id is not None:
+            raise HTTPException(status_code=404, detail="user not found")
+
+        while current_date <= end_date:
+            application_showing_with_status_dto = ApplicationShowingWithStatusDTO(
+                statuses=statuses,
+                user_id=user_id,
+                date=current_date
+            )
+
+            timetables.append(
+                application_service.show_my_applications(db, application_showing_with_status_dto
                                                                   ))
 
             daily_applications = DayWithStatus(

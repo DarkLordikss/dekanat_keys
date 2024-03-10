@@ -231,6 +231,31 @@ class ApplicationService:
         return formatted_timetable
 
     @staticmethod
+    async def show_my_applications(
+            db: Session,
+            application_showing_with_status_dto: ApplicationShowingWithStatusDTO
+    ):
+        subquery_statused = db \
+            .query(Application) \
+            .filter(Application.class_date == application_showing_with_status_dto.date) \
+            .filter(or_(Application.application_status_id == status.value
+                        for status in application_showing_with_status_dto.statuses)) \
+            .subquery()
+
+        query = db \
+            .query(Classroom, subquery_statused)
+
+        query = query.join(subquery_statused, subquery_statused.c.classroom_id == Classroom.id)
+
+        if application_showing_with_status_dto.user_id is not None:
+            query = query.filter(subquery_statused.c.user_id == application_showing_with_status_dto.user_id)
+
+        result_applications = query.all()
+        formatted_timetable = ApplicationService.fill_timetable_data_with_status(result_applications)
+
+        return formatted_timetable
+
+    @staticmethod
     async def show_applications_with_status(
             db: Session,
             application_showing_with_status_dto: ApplicationShowingWithStatusDTO
