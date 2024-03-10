@@ -67,7 +67,10 @@ class UserService:
         try:
             users = db \
                 .query(User) \
-                .filter(User.role_id.in_([role for role in roles])) \
+                .filter(
+                        User.role_id.in_([role for role in roles]),
+                        User.is_verified == True
+                        ) \
                 .all()
 
             return users
