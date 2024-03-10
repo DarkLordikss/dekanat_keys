@@ -13,7 +13,8 @@ class OKOSheduleItemFree (context: Context, attrs: AttributeSet?) : OKOSheduleIt
         freeTextView = TextView(context).apply {
             text = "Свободно"
             setTextColor(context.getColor(R.color.white))
-            typeface = context.resources.getFont(R.font.gotham_book)
+            typeface = context.resources.getFont(R.font.gotham_bold)
+            textSize = 17f
         }
 
         addView(freeTextView)

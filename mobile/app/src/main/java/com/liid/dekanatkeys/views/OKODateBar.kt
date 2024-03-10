@@ -9,9 +9,10 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.liid.dekanatkeys.R
+import com.liid.dekanatkeys.activities.ui.dashboard.DashboardFragment
+import com.liid.dekanatkeys.activities.ui.dashboard.DashboardViewModel
 import com.liid.dekanatkeys.helpers.Log
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 
 @SuppressLint("UseCompatLoadingForDrawables")
@@ -24,15 +25,19 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
     private val weekDays = listOf("пн", "вт" , "ср", "чт", "пт", "сб", "вс")
     private val mouthNames = listOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
     private lateinit var activeButton: OKODayButton
-    private var weekOffset = 0L
+
+    lateinit var startDate: LocalDate
+    lateinit var endDate: LocalDate
+
+    private val dashboardViewModel: DashboardViewModel = (parentFragment as DashboardFragment).dashboardViewModel
 
     init {
-//        parentFragment = context as OKODateBarInteraction
         dayButtons = List(7) { index ->
             val button = OKODayButton(context, null)
             button.setOnClickListener{it ->
                 val btn = it as OKODayButton
                 setActive(btn)
+                parentFragment.dateButtonClicked(dashboardViewModel.currentDayPos)
             }
             button
         }
@@ -67,8 +72,10 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
             scaleX = 1.5f
             scaleY = 1.5f
             setOnClickListener{
-                weekOffset++
+                dashboardViewModel.weekOffset++
                 setDatesToButtons()
+                dashboardViewModel.currentDayPos = 0
+                parentFragment.setStartEndDates(startDate, endDate, dashboardViewModel.currentDayPos)
             }
         }
         prevImageButton = ImageButton(context).apply {
@@ -79,8 +86,10 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
             scaleX = 1.5f
             scaleY = 1.5f
             setOnClickListener{
-                weekOffset--
+                dashboardViewModel.weekOffset--
                 setDatesToButtons()
+                dashboardViewModel.currentDayPos = 0
+                parentFragment.setStartEndDates(startDate, endDate, dashboardViewModel.currentDayPos)
             }
         }
 
@@ -95,19 +104,22 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
     }
 
     private fun setDatesToButtons(){
-        val dates = getDaysOfWeek(weekOffset)
+        val dates = getDaysOfWeek(dashboardViewModel.weekOffset)
+
+        startDate = dates[0]
+        endDate =  dates[dates.size-1]
         val currDate = LocalDate.now()
 
         for (i in 0 until dates.size){
             dayButtons[i].setDate(dates[i])
         }
 
-        setActive(dayButtons[0])
-        for (i in 0 until dates.size){
-            if(dates[i] == currDate){
-                setActive(dayButtons[i])
-            }
-        }
+        setActive(dayButtons[dashboardViewModel.currentDayPos])
+//        for (i in 0 until dates.size){
+//            if(dates[i] == currDate){
+//                setActive(dayButtons[i])
+//            }
+//        }
     }
 
     private fun setActive(btn: OKODayButton){
@@ -116,6 +128,8 @@ class OKODateBar(context: Context, attrs: AttributeSet?, private val parentFragm
         }
         btn.setActive()
         activeButton = btn
+        dashboardViewModel.currentDayPos = dayButtons.indexOf(activeButton)
+        dashboardViewModel.currentDate = startDate.plusDays(dashboardViewModel.currentDayPos.toLong())
         parentFragment.setMonth(mouthNames[activeButton.getDate().monthValue-1])
     }
 

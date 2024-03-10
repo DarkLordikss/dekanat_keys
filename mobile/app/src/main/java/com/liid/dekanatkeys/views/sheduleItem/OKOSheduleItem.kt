@@ -3,6 +3,7 @@ package com.liid.dekanatkeys.views.sheduleItem
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -21,6 +22,12 @@ open class OKOSheduleItem (context: Context, attrs: AttributeSet?) : LinearLayou
             text = "0"
             setTextColor(context.getColor(R.color.white))
             typeface = context.resources.getFont(R.font.gotham_book)
+            layoutParams = LinearLayout.LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.END
+            }
         }
         super.addView(lessonTextView)
 
@@ -54,4 +61,7 @@ open class OKOSheduleItem (context: Context, attrs: AttributeSet?) : LinearLayou
         lessonTextView.text = lessonNumber.toString() + "-ая пара"
     }
 
+    fun getLessonNumber():Int{
+        return lessonNumber
+    }
 }
