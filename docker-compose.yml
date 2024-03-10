@@ -45,8 +45,8 @@ services:
     networks:
       - default
       - oko_net
-    expose:
-      - 5000
+    ports:
+      - 3222:5000
     depends_on:
       - backend
     restart: always
