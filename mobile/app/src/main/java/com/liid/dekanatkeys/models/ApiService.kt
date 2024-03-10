@@ -41,4 +41,10 @@ interface ApiService {
     @GET("user/users/")
     fun fetchUsers(@Query("roles") roles: List<Int>, @Header("Authorization") token: String): Call<List<UserInfo>>
 
+    @GET("applications/show_my")
+    fun fetchMyApplications(@Query("start_date") start_date : LocalDate,
+                          @Query("end_date") end_date : LocalDate,
+                          @Query("statuses") statuses: List<Int>,
+                            @Header("Authorization") token: String): Call<ApplicationsResponse>
+
 }

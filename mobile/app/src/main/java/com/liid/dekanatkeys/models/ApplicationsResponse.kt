@@ -31,6 +31,49 @@ class TimetableWithList(timetable: Timetable){
         timetable.application7?.get(0),
     )
 }
+class ApplicationWithDateStatus(val id: UUID,
+                                val name: String,
+                                val description: String,
+                                val building: Int,
+                                val classNumber: Int,
+                                val date: String,
+                                val status: Int,
+                                val lessonNumber: Int){
+
+    companion object{
+        fun getFromTimetableWithDates(TimetableWithDates: List<TimetableWithDate>) : List<ApplicationWithDateStatus>{
+            var out = mutableListOf<ApplicationWithDateStatus>()
+            for(day in TimetableWithDates)
+            {
+                day.date
+                var applications = listOf<Application?>(
+                    day.timetable.application1?.get(0),
+                    day.timetable.application2?.get(0),
+                    day.timetable.application3?.get(0),
+                    day.timetable.application4?.get(0),
+                    day.timetable.application5?.get(0),
+                    day.timetable.application6?.get(0),
+                    day.timetable.application7?.get(0),
+                )
+
+                for (i in applications.indices){
+                    if(applications[i] != null){
+                        out.add(ApplicationWithDateStatus(applications[i]!!.id,
+                            applications[i]!!.name,
+                            applications[i]!!.description,
+                            applications[i]!!.building,
+                            applications[i]!!.classNumber,
+                            day.date,
+                            applications[i]!!.status,
+                            i + 1))
+                    }
+                }
+            }
+            return out.toList()
+        }
+    }
+
+}
 
 class TimetableWithDate(@SerializedName("timetable") val timetable: Timetable,
                         @SerializedName("date") val date: String){
@@ -42,6 +85,7 @@ class Application(@SerializedName("classroom_id") val id: UUID,
                   @SerializedName("name") val name: String,
                   @SerializedName("description") val description: String,
                   @SerializedName("buildings") val building: Int,
-                  @SerializedName("class_number") val classNumber: Int){
+                  @SerializedName("class_number") val classNumber: Int,
+                  @SerializedName("status") val status: Int){
 
 }
