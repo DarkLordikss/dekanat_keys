@@ -346,6 +346,10 @@ async def change_role(
             logger.warning(f"(Change role) You can't do this with role_id: {user.role_id}")
             raise HTTPException(status_code=403, detail="You're not dean's office")
 
+        if wished_role_id not in range(1, 3):
+            logger.warning(f"(Change role) Bad role: {user.role_id}")
+            raise HTTPException(status_code=400, detail="Bad role")
+
         if wished_role_id == UserRoles.Dean_office_employee.value:
             logger.warning(f"(Change role) You can't make dean's office: {user.role_id}")
             raise HTTPException(status_code=403, detail="3 is dean's role")
