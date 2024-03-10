@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.core.view.marginBottom
 import com.liid.dekanatkeys.R
 
-class OKOSheduleItemBooked(context: Context, attrs: AttributeSet?) : OKOSheduleItem(context, attrs) {
+open class OKOSheduleItemBooked(context: Context, attrs: AttributeSet?) : OKOSheduleItem(context, attrs) {
 
     private val nameTextView : TextView
     private val descriptionTextView : TextView
@@ -41,7 +41,7 @@ class OKOSheduleItemBooked(context: Context, attrs: AttributeSet?) : OKOSheduleI
         setBackgroundColor(context.getColor(R.color.grey))
     }
 
-    fun setApplicationInfo(name:String, description: String, building: Int, classNumber: Int){
+    open fun setApplicationInfo(name:String, description: String, building: Int, classNumber: Int){
         nameTextView.text = name
         descriptionTextView.text = description
         buildingTextView.text = "${building} корпус"
