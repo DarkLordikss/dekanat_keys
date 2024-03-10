@@ -7,6 +7,7 @@ from uuid import UUID
 
 import config
 from models.dto.message_dto import MessageDTO
+from models.enum.userroles import UserRoles
 from services.email_service import EmailService
 from storage.db_config import get_db
 from sqlalchemy.orm import Session
@@ -16,7 +17,7 @@ from models.dto.user_access_token_dto import UserAccessTokenDTO
 
 from services.user_service import UserService
 from services.auth_service import AuthService
-from models.dto.user_profile_dto import UserProfileDTO, UserProfileWithIdDTO
+from models.dto.user_profile_dto import UserProfileDTO
 from models.dto.error_dto import ErrorDTO
 from models.dto.user_reg_dto import UserRegDTO
 
@@ -189,6 +190,7 @@ async def get_profile(access_token: str = Depends(oauth2_scheme),
         logger.info(f"(Get user profile) Successful get profile with id: {user.id}")
 
         return UserProfileDTO(
+            id=user.id,
             email=user.email,
             full_name=user.full_name,
             role=(await user_service.get_role_by_id(db, user.role_id)).name
@@ -250,10 +252,10 @@ async def logout(access_token: str = Depends(oauth2_scheme),
 @user_router.get(
     "/users",
     tags=[config.SWAGGER_GROUPS["user"]],
-    response_model=list[UserProfileWithIdDTO],
+    response_model=list[UserProfileDTO],
     responses={
         200: {
-            "model": list[UserProfileWithIdDTO]
+            "model": list[UserProfileDTO]
 
         },
         401: {
@@ -287,7 +289,7 @@ async def get_users(
 
         for user in users:
             users_dto.append(
-                UserProfileWithIdDTO(
+                UserProfileDTO(
                     id=user.id,
                     email=user.email,
                     full_name=user.full_name,
@@ -341,11 +343,11 @@ async def change_role(
 
         user = await user_service.get_user_by_id(db, (await token_data)["sub"])
 
-        if user.role_id != 3:
+        if user.role_id != UserRoles.Teacher:
             logger.warning(f"(Change role) You can't do this with role_id: {user.role_id}")
             raise HTTPException(status_code=403, detail="You're not dean's office")
 
-        if wished_role_id == 3:
+        if wished_role_id == UserRoles.Teacher:
             logger.warning(f"(Change role) You can't make dean's office: {user.role_id}")
             raise HTTPException(status_code=403, detail="3 is dean's role")
 
