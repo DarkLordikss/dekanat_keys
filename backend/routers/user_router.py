@@ -3,6 +3,7 @@ import logging
 from fastapi import HTTPException, Depends, APIRouter, Query
 
 import jwt
+from uuid import UUID
 
 import config
 from models.dto.message_dto import MessageDTO
@@ -15,7 +16,7 @@ from models.dto.user_access_token_dto import UserAccessTokenDTO
 
 from services.user_service import UserService
 from services.auth_service import AuthService
-from models.dto.user_profile_dto import UserProfileDTO
+from models.dto.user_profile_dto import UserProfileDTO, UserProfileWithIdDTO
 from models.dto.error_dto import ErrorDTO
 from models.dto.user_reg_dto import UserRegDTO
 
@@ -245,13 +246,14 @@ async def logout(access_token: str = Depends(oauth2_scheme),
         logger.error(f"(Login) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @user_router.get(
     "/users",
     tags=[config.SWAGGER_GROUPS["user"]],
-    response_model=list[UserProfileDTO],
+    response_model=list[UserProfileWithIdDTO],
     responses={
         200: {
-            "model": list[UserProfileDTO]
+            "model": list[UserProfileWithIdDTO]
 
         },
         401: {
@@ -285,7 +287,8 @@ async def get_users(
 
         for user in users:
             users_dto.append(
-                UserProfileDTO(
+                UserProfileWithIdDTO(
+                    id=user.id,
                     email=user.email,
                     full_name=user.full_name,
                     role=(await user_service.get_role_by_id(db, user.role_id)).name
@@ -300,4 +303,57 @@ async def get_users(
         raise
     except Exception as e:
         logger.error(f"(Get user profile) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@user_router.post(
+    "/change_role/",
+    tags=[config.SWAGGER_GROUPS["user"]],
+    response_model=MessageDTO,
+    responses={
+        200: {
+            "model": MessageDTO
+
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def change_role(
+                    another_user_id: str,
+                    wished_role_id : int,
+                    access_token: str = Depends(oauth2_scheme),
+                    db: Session = Depends(get_db),
+                    user_service: UserService = Depends(UserService),
+                    email_service: EmailService = Depends(EmailService),
+                    auth_service: AuthService = Depends(AuthService)
+                    ):
+    try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Get user profile) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+
+        token_data = auth_service.get_data_from_access_token(access_token)
+
+        user = await user_service.get_user_by_id(db, (await token_data)["sub"])
+
+        if user.role_id != 3:
+            logger.warning(f"(Change role) You can't do this with role_id: {user.role_id}")
+            raise HTTPException(status_code=403, detail="You're not dean's office")
+
+        if wished_role_id == 3:
+            logger.warning(f"(Change role) You can't make dean's office: {user.role_id}")
+            raise HTTPException(status_code=403, detail="3 is dean's role")
+
+        message = await user_service.change_user_role(db, wished_role_id, another_user_id)
+
+        return MessageDTO(message=message)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Reg) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
