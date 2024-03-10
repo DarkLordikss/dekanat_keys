@@ -2,6 +2,7 @@ import logging
 import uuid
 
 from sqlalchemy.orm import Session
+from uuid import UUID
 
 from sqlalchemy import or_, and_
 from sqlalchemy.sql import text
@@ -13,7 +14,7 @@ from typing import List
 from models.dto.application_create_dto import ApplicationCreateDTO
 from models.dto.available_classrooms_dto import AvailableClassroomsShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
-from models.dto.formatted_application_with_status_dto import PairWithStatus
+from models.dto.formatted_application_with_status_dto import PairWithStatus, ApplicationInfDTO
 from models.dto.formatted_available_classrooms_dto import ClassroomForPair, ClassroomForPairWithTrack
 from models.enum.applicationstatuses import ApplicationStatuses
 from models.enum.userroles import UserRoles
@@ -261,6 +262,23 @@ class ApplicationService:
                 formatted_timetable[pair_number] = [pair]
 
         return formatted_timetable
+
+    async def show_concrete_application(self, application_id: UUID, db: Session) -> ApplicationInfDTO:
+        application = db.query(Application).filter(Application.id == application_id).first()
+        self.logger.info(application.application_date)
+        application_dto = ApplicationInfDTO(
+            application_id=application.id,
+            classroom_id=application.classroom_id,
+            user_id=application.user_id,
+            status=application.application_status_id,
+            name=application.name,
+            description=application.description,
+            application_date=application.application_date.date(),
+            class_date=application.class_date,
+            time_table_id=application.time_table_id
+        )
+        return application_dto
+
 
     @staticmethod
     async def show_my_applications(

@@ -16,9 +16,11 @@ from models.dto.available_classrooms_dto import AvailableClassroomsShowingDTO
 from models.dto.application_showing_with_status_dto import ApplicationShowingWithStatusDTO
 from models.dto.error_dto import ErrorDTO
 from models.dto.formatted_available_classrooms_dto import FormattedTimetable, Day, ClassroomForPairWithTrack
-from models.dto.formatted_application_with_status_dto import FormattedTimetableWithStatus, DayWithStatus
+from models.dto.formatted_application_with_status_dto import FormattedTimetableWithStatus, DayWithStatus, \
+    ApplicationInfDTO
 from models.dto.message_dto import MessageDTO
 from models.enum.userroles import UserRoles
+from models.tables.application import Application
 from models.tables.classroom import Classroom
 from models.tables.connected_user import ConnectedUser
 from models.tables.transfering_application import TransferingApplication
@@ -451,6 +453,41 @@ async def show_my_applications(
             schedule[index].timetable = await timetables[index]
 
         return FormattedTimetableWithStatus(schedule=schedule)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Application) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@application_router.get(
+    "/show_concrete_application/",
+    tags=[config.SWAGGER_GROUPS["application"]],
+    response_model=ApplicationInfDTO,
+    responses={
+        200: {
+            "model": ApplicationInfDTO
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def show_concrete_application(
+        application_id: UUID,
+        db: Session = Depends(get_db),
+        application_service: ApplicationService = Depends(ApplicationService),
+):
+    try:
+        application = await application_service.show_concrete_application(application_id, db)
+        return application
 
     except HTTPException:
         raise
