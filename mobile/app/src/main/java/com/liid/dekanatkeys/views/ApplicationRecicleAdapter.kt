@@ -24,6 +24,6 @@ class ApplicationRecicleAdapter(private val myApplications: List<Application?>, 
         val item = (holder as MyApplicationViewHolder).itemView as OKOApplicationItem
         item.setLessonNumber(position + 1)
         val myApplication = myApplications[position]!!
-        item.setApplicationInfo(myApplication.name, myApplication.description, myApplication.building, myApplication.classNumber, myApplication.date, myApplication.status)
+        //item.setApplicationInfo(myApplication.name, myApplication.description, myApplication.building, myApplication.classNumber, myApplication.date, myApplication.status)
     }
 }

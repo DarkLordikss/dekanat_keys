@@ -29,7 +29,11 @@ class MyApplicationFragment : Fragment() {
         myApplicationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
 
-        findNavController().navigate(R.id.action_navigation_my_application_to_usersFragment)
+        //findNavController().navigate(R.id.action_navigation_my_application_to_usersFragment)
+
+        binding.notificationButton.setOnClickListener{
+            findNavController().navigate(R.id.action_navigation_my_application_to_notificationFragment)
+        }
 
 //        val adapter = ApplicationRecicleAdapter(applicationList, this)
 //        myApplicationRecyclerView.adapter = adapter
@@ -37,6 +41,7 @@ class MyApplicationFragment : Fragment() {
 
         return binding.root
     }
+
 
 
 }
