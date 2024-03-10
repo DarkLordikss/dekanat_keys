@@ -51,6 +51,8 @@ class MainActivity : AppCompatActivity() {
                 {
                     val editor = preferences.edit()
                     editor.putString(getString(R.string.roleName), userProfile.role)
+                    editor.putString("name", userProfile.name)
+                    editor.putString("email", userProfile.email)
                     editor.apply()
                 }
             },
@@ -61,5 +63,7 @@ class MainActivity : AppCompatActivity() {
             }
         ))
     }
+
+
 
 }

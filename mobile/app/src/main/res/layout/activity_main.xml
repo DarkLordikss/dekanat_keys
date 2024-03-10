@@ -9,7 +9,7 @@
     android:paddingRight="8dp"
     android:paddingBottom="8dp"
     >
-    
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav_view"
