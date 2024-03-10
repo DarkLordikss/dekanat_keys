@@ -345,22 +345,23 @@ async def show_applications_with_status(
 async def show_my_applications(
         start_date: date,
         end_date: date = None,
+        access_token: str = Depends(config.oauth2_scheme),
         statuses: list[int] = Query(),
         db: Session = Depends(get_db),
-        access_token: str = Depends(config.oauth2_scheme),
         application_service: ApplicationService = Depends(ApplicationService),
         classroom_service: ClassroomService = Depends(ClassroomService),
         entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
-        auth_service: AuthService = Depends(ApplicationService),
+        auth_service: AuthService = Depends(AuthService),
         user_service: UserService = Depends(UserService)
 ):
     try:
         if await auth_service.check_revoked(db, access_token):
-            logger.warning(f"(Change deal status) Token is revoked: {access_token}")
+            logger.warning(f"(Create application) Token is revoked: {access_token}")
             raise HTTPException(status_code=403, detail="Token revoked")
 
         token_data = auth_service.get_data_from_access_token(access_token)
         user = await user_service.get_user_by_id(db, (await token_data)["sub"])
+
         user_id = user.id
 
         if not end_date:

@@ -10,7 +10,7 @@ from models.enum.applicationstatuses import ApplicationStatuses
 
 class ApplicationShowingWithStatusDTO(BaseModel):
     building: int = None
-    classrooms: List[int] = Query()
+    classrooms: List[int] = Query(None)
     statuses: list[ApplicationStatuses]
     user_id: Optional[UUID] = None
     date: date
