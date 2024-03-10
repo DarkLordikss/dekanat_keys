@@ -585,6 +585,9 @@ async def transfer_key(
             db.add(message_data)
             db.commit()
 
+    except jwt.PyJWTError as e:
+        logger.warning(f"(Get users profiles) Bad token: {e}")
+        raise HTTPException(status_code=403, detail="Bad token")
     except HTTPException:
         raise
     # except Exception as e:
