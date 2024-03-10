@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/chooseBuildingFragment">
+
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.liid.dekanatkeys.activities.ui.dashboard.DashboardFragment"
+        android:label="@string/title_dashboard"
+        tools:layout="@layout/fragment_dashboard">
+        <action
+            android:id="@+id/action_navigation_dashboard_to_createApplicationFragment"
+            app:destination="@id/createApplicationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_my_application"
+        android:name="com.liid.dekanatkeys.activities.ui.myApplication.MyApplicationFragment"
+        android:label="@string/title_my_application"
+        tools:layout="@layout/fragment_my_application" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.liid.dekanatkeys.activities.ui.profile.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/chooseBuildingFragment"
+        android:name="com.liid.dekanatkeys.fragments.ChooseBuildingFragment"
+        android:label="@string/title_dashboard"
+        tools:layout="@layout/fragment_choose_building" >
+        <action
+            android:id="@+id/action_chooseBuildingFragment_to_chooseClassroomFragment"
+            app:destination="@id/chooseClassroomFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/chooseClassroomFragment"
+        android:name="com.liid.dekanatkeys.fragments.ChooseClassroomFragment"
+        android:label="@string/title_dashboard"
+        tools:layout="@layout/fragment_choose_classroom" >
+        <action
+            android:id="@+id/action_chooseClassroomFragment_to_navigation_dashboard"
+            app:destination="@id/navigation_dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/createApplicationFragment"
+        android:name="com.liid.dekanatkeys.fragments.CreateApplicationFragment"
+        android:label="@string/title_create_application"
+        tools:layout="@layout/fragment_create_application" >
+        <action
+            android:id="@+id/action_createApplicationFragment_to_navigation_my_application"
+            app:destination="@id/navigation_my_application" />
+    </fragment>
+
+
+</navigation>
