@@ -2,7 +2,7 @@ import json
 
 from fastapi import FastAPI, APIRouter, WebSocket, HTTPException, Depends, Query, WebSocketDisconnect
 import logging
-from typing import List
+from typing import List, Dict
 from sqlalchemy.orm import Session
 
 from models.tables.connected_user import ConnectedUser
@@ -17,6 +17,29 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 notifications_websocket = FastAPI(prefix="/notifications")
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}
+
+    async def connect(self, websocket: WebSocket, user_id: str):
+        await websocket.accept()
+        self.active_connections[user_id] = websocket
+
+    def disconnect(self, user_id: str):
+        del self.active_connections[user_id]
+
+    async def send_personal_message(self, message: str, user_id: str):
+        websocket = self.active_connections.get(user_id)
+        if websocket:
+            await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections.values():
+            await connection.send_text(message)
+
+
+manager = ConnectionManager()
 
 """""
 clients = []
@@ -54,7 +77,8 @@ async def websocket_endpoint(
         db: Session = Depends(get_db),
         websocket_service: WebsocketService = Depends(WebsocketService)
 ):
-    await websocket.accept()
+    await manager.connect(websocket, user_id)
+    #await websocket.accept()
     logger.info(f"PISYA POPA KAKA")
     client_sockets[user_id] = websocket
     try:
@@ -78,6 +102,9 @@ async def websocket_endpoint(
             if data : await websocket_service.change_application_owner(db, user_sender_id, user_id, application_id, answer)
     except WebSocketDisconnect:
         ##client_sockets.remove(websocket)
-        del client_sockets[websocket]
+        # if websocket in list(client_sockets.keys()):
+        #     del client_sockets[websocket]
+        manager.disconnect(user_id)
+        await manager.broadcast(f"Client #{user_id} left the chat")
 
 

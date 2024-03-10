@@ -32,7 +32,7 @@ from services.application_service import ApplicationService
 from services.entity_verifier_service import EntityVerifierService
 
 import config
-from websockets_for_notifications.notification_websocket import client_sockets
+from websockets_for_notifications.notification_websocket import client_sockets, manager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -571,14 +571,19 @@ async def transfer_key(
             user_recipient_id=user_recipient_id,
             user_sender_id=user_sender.id
         )
-
+        logger.info(f"2222222222222222222")
+        await manager.send_personal_message(json.dumps(message_data.__json__()), user_recipient_id)
         if recipient:
-            client_socket = db.query(ConnectedUser).filter(ConnectedUser.id == user_recipient_id).first()
-            print(client_socket)
+            logger.info(f"2222222222222222222")
+            for connection in manager.active_connections:
+                logger.info(f"1111111111111 {connection},        {connection.client_id}, {connection.user_id}")
+                if connection.user_id == user_recipient_id:  # Предположим, что у вас есть атрибут client_id для WebSocket
+                    await manager.send_personal_message(message_data.__json__(), connection)
             #websocket = client_socket.websocket_id
-            websocket = client_sockets[user_recipient_id]
+            #websocket = manager.send_personal_message(message_data.__json__(), user_recipient_id)
+            #websocket = client_sockets[user_recipient_id]
             #message_json = json.dumps(message_data)
-            await websocket.send_json(message_data.__json__())
+            #await websocket.send_json(message_data.__json__())
         else:
             db.add(message_data)
             db.commit()
