@@ -1,4 +1,4 @@
-package com.liid.dekanatkeys.models
+package com.liid.dekanatkeys.models.user
 import com.google.gson.annotations.SerializedName
 
 data class LoginRequest (@SerializedName("email") val email: String,

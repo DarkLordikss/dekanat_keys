@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".fragments.CreateApplicationFragment">
+
+  <LinearLayout
+      android:id="@+id/nameLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+    <com.liid.dekanatkeys.views.OKOEditText
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="@string/prompt_application_name"
+        android:hint="@string/prompt_application_name"
+        android:inputType="textEmailAddress"
+        android:selectAllOnFocus="true" />
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/descriptionLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:orientation="vertical">
+
+    <com.liid.dekanatkeys.views.OKOEditText
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="@string/prompt_application_description"
+        android:hint="@string/prompt_application_description"
+        android:inputType="textMultiLine"
+        android:selectAllOnFocus="true" />
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/dublicatesLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:orientation="vertical">
+
+    <com.liid.dekanatkeys.views.OKOEditText
+        android:id="@+id/dublicates"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="@string/prompt_application_dublicates"
+        android:hint="@string/prompt_application_dublicates"
+        android:inputType="number"
+        android:text="1"
+        android:selectAllOnFocus="true" />
+  </LinearLayout>
+
+
+  <com.liid.dekanatkeys.views.OKOButton
+      android:id="@+id/createButton"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="start"
+      android:layout_marginTop="10dp"
+      android:enabled="false"
+      android:text="@string/action_create_application"
+      android:textSize="20sp" />
+
+</LinearLayout>
