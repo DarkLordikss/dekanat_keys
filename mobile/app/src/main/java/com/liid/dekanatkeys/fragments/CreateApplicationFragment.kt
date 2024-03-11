@@ -138,7 +138,8 @@ class CreateApplicationFragment : Fragment() {
         OKOApiSingleton.api.createApplication(response, "bearer $token").enqueue(OKOCallback<MessageResponse>(
             successCallback = {response ->
                 Log(response.body()!!.message)
-                findNavController().navigate(R.id.action_createApplicationFragment_to_navigation_my_application)
+//                findNavController().navigate(R.id.action_createApplicationFragment_to_navigation_my_application)
+                Toast.makeText(requireContext(), "Заявка создана", Toast.LENGTH_LONG).show()
             },
             errorCallback = {response ->
                 Log("error code:" + response.code().toString())

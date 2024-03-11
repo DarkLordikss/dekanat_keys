@@ -21,6 +21,7 @@ import com.liid.dekanatkeys.models.TransferKeySocketMessage
 import com.liid.dekanatkeys.models.user.UserInfo
 import com.liid.dekanatkeys.views.NotificationRecyclerAdapter
 import com.liid.dekanatkeys.views.UsersRecyclerAdapter
+import java.lang.Exception
 
 class NotificationFragment : Fragment() {
     private lateinit var binding: FragmentNotificationBinding
@@ -64,7 +65,7 @@ class NotificationFragment : Fragment() {
                         for (a in applications){
                             Log(a.application_id)
                         }
-                        notificationRecyclerView.adapter = NotificationRecyclerAdapter(applications)
+                        notificationRecyclerView.adapter = NotificationRecyclerAdapter(applications, this)
                     }
                 }
             },
@@ -74,11 +75,10 @@ class NotificationFragment : Fragment() {
         ))
     }
 
-    private fun send(){
-        val text = preferences.getString(getString(R.string.transfer_key_socket_message), null)
-        val transferKeySocketMessage = Gson().fromJson(text, TransferKeySocketMessage::class.java)
-        Log("${transferKeySocketMessage.application_id}:${transferKeySocketMessage.user_sender_id}:True")
-        WebSocketSingleton.socket.send("${transferKeySocketMessage.application_id}:${transferKeySocketMessage.user_sender_id}:True")
+    fun deleteItem(pos: Int){
+        applications.removeAt(pos)
+        notificationRecyclerView.adapter = NotificationRecyclerAdapter(applications, this)
+
     }
 
     private fun initKeyMessages(){
@@ -90,7 +90,13 @@ class NotificationFragment : Fragment() {
             val out = mutableListOf<TransferKeySocketMessage>()
             val keyMessagesSplitText = keyMessagesMergedText.split('#')
             for (k in keyMessagesSplitText){
-                out.add(Gson().fromJson(k, TransferKeySocketMessage::class.java))
+                Log("k: " + k)
+                try {
+                    out.add(Gson().fromJson(k, TransferKeySocketMessage::class.java))
+                }
+                catch (_: Exception){
+
+                }
             }
             keyMessages = out.toList()
         }

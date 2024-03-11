@@ -65,6 +65,8 @@ class MainActivity : AppCompatActivity() {
                     editor.putString(getString(R.string.userId), userProfile.id)
                     editor.putString("name", userProfile.name)
                     editor.putString("email", userProfile.email)
+                    editor.putString(getString(R.string.transfer_key_socket_message), null)
+
                     editor.apply()
 
                     createWebSocket(userProfile.id)

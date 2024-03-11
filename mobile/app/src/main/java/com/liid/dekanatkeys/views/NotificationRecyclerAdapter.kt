@@ -5,13 +5,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liid.dekanatkeys.R
+import com.liid.dekanatkeys.fragments.NotificationFragment
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.WebSocketSingleton
 import com.liid.dekanatkeys.models.ApplicationWithDateStatus
 import com.liid.dekanatkeys.models.TransferKeySocketMessage
 import java.time.LocalDate
 
-class NotificationRecyclerAdapter(private val notifications : List<ApplicationWithDateStatus>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class NotificationRecyclerAdapter(private val notifications : List<ApplicationWithDateStatus>, private val parentFragment: NotificationFragment) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class NotificationRecyclerHolder(var itemView: OKOApplicationItemMessage) : RecyclerView.ViewHolder(itemView){
 
@@ -31,11 +32,12 @@ class NotificationRecyclerAdapter(private val notifications : List<ApplicationWi
         item.applyButton.setOnClickListener{
             val i = item as OKOApplicationItemMessage
             WebSocketSingleton.socket.send("${i.applicationId}:${i.userSenderId}:True")
+            parentFragment.deleteItem(position)
         }
         item.applyButton.setOnClickListener{
             val i = item as OKOApplicationItemMessage
             WebSocketSingleton.socket.send("${i.applicationId}:${i.userSenderId}:False")
-
+            parentFragment.deleteItem(position)
         }
         item.setLessonNumber(position + 1)
         item.setApplicationInfo(notification.name, notification.description, notification.building, notification.classNumber, LocalDate.parse(notification.date), notification.status)
