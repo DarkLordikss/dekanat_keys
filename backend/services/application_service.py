@@ -194,7 +194,7 @@ class ApplicationService:
 
         for key in keys:
             classroom_id = key[0].id
-            user_id = key[1].user_id if key[1] else None
+            user_id = key[1].user_id if key[1] and key[1].application_status_id == 3 else None
 
             if classroom_id in keys_dto_dict:
                 if user_id:
