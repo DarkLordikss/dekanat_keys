@@ -201,7 +201,8 @@ class ApplicationService:
                         classroom_id=classroom_id,
                         buildings=key[0].building,
                         class_number=key[0].number,
-                        user_id=user_id
+                        user_id=user_id,
+                        name=db.query(User).filter((User.id == user_id) & User.is_verified).first().full_name
                     )
             else:
                 keys_dto_dict[classroom_id] = ClassroomForPairWithTrack(
