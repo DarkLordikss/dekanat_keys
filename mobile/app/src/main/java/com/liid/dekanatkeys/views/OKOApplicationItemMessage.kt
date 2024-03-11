@@ -12,6 +12,9 @@ class OKOApplicationItemMessage (context: Context, attrs: AttributeSet?) : OKOAp
 
     private val buttonLayout: LinearLayout
 
+    var applicationId : String? = null
+    var userSenderId : String? = null
+
     val applyButton : Button
     val cancelButton : Button
 

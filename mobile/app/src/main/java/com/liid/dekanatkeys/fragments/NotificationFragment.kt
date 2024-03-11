@@ -15,6 +15,7 @@ import com.liid.dekanatkeys.databinding.FragmentNotificationBinding
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
 import com.liid.dekanatkeys.helpers.OKOCallback
+import com.liid.dekanatkeys.helpers.WebSocketSingleton
 import com.liid.dekanatkeys.models.ApplicationWithDateStatus
 import com.liid.dekanatkeys.models.TransferKeySocketMessage
 import com.liid.dekanatkeys.models.user.UserInfo
@@ -52,7 +53,9 @@ class NotificationFragment : Fragment() {
         OKOApiSingleton.api.getApplication(id).enqueue(OKOCallback<ApplicationWithDateStatus>(
             successCallback = {response ->
                 if (response.body() != null) {
-                    applications.add(response.body()!!)
+                    applications.add(response.body()!!.apply{
+                        userSenderId = keyMessages[k].user_sender_id
+                    })
                     if (k+1 < keyMessages.size)
                     {
                         getApplication(k+1)
@@ -69,6 +72,13 @@ class NotificationFragment : Fragment() {
                 Log("error code:" + response.code().toString())
             }
         ))
+    }
+
+    private fun send(){
+        val text = preferences.getString(getString(R.string.transfer_key_socket_message), null)
+        val transferKeySocketMessage = Gson().fromJson(text, TransferKeySocketMessage::class.java)
+        Log("${transferKeySocketMessage.application_id}:${transferKeySocketMessage.user_sender_id}:True")
+        WebSocketSingleton.socket.send("${transferKeySocketMessage.application_id}:${transferKeySocketMessage.user_sender_id}:True")
     }
 
     private fun initKeyMessages(){

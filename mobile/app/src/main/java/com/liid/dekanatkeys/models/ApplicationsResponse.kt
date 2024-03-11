@@ -42,6 +42,8 @@ class ApplicationWithDateStatus(
     @SerializedName("status") val status: Int,
     @SerializedName("time_table_id")val lessonNumber: Int){
 
+    var userSenderId :String? = null
+
     companion object{
         fun getFromTimetableWithDates(TimetableWithDates: List<TimetableWithDate>) : List<ApplicationWithDateStatus>{
             var out = mutableListOf<ApplicationWithDateStatus>()
