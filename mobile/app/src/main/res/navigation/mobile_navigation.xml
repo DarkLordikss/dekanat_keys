@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_navigation_my_application_to_usersFragment"
             app:destination="@id/usersFragment" />
+        <action
+            android:id="@+id/action_navigation_my_application_to_notificationFragment"
+            app:destination="@id/notificationFragment" />
     </fragment>
 
     <fragment
@@ -60,8 +63,13 @@
     <fragment
         android:id="@+id/usersFragment"
         android:name="com.liid.dekanatkeys.fragments.UsersFragment"
-        android:label="fragment_users"
+        android:label="@string/title_user_fragments"
         tools:layout="@layout/fragment_users" />
+    <fragment
+        android:id="@+id/notificationFragment"
+        android:name="com.liid.dekanatkeys.fragments.NotificationFragment"
+        android:label="@string/title_notification_fragments"
+        tools:layout="@layout/fragment_notification" />
 
 
 </navigation>

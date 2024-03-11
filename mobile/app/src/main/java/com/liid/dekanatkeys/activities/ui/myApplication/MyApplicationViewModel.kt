@@ -6,8 +6,6 @@ import androidx.lifecycle.ViewModel
 
 class MyApplicationViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is my application Fragment"
-    }
-    val text: LiveData<String> = _text
+    var applicationId:String? = null
+    var name:String? = null
 }

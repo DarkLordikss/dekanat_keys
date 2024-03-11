@@ -64,6 +64,9 @@ class MainActivity : AppCompatActivity() {
                     val editor = preferences.edit()
                     editor.putString(getString(R.string.roleName), userProfile.role)
                     editor.putString(getString(R.string.userId), userProfile.id)
+                    editor.putString("name", userProfile.name)
+                    editor.putString("email", userProfile.email)
+
                     editor.apply()
 
                     createWebSocket(userProfile.id)
@@ -78,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    //запустить в службе
+
     private fun createWebSocket(userId: String){
         socketRequest = Request.Builder().url("ws://89.23.106.97:3223/notifications/ws/${userId}").build()
         webSocket = socketClient.newWebSocket(socketRequest, object : WebSocketListener(){
@@ -110,5 +113,12 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
+    override fun onSupportNavigateUp(): Boolean {
+        val controller = findNavController(R.id.nav_host_fragment_activity_main)
+        return controller.navigateUp() || super.onSupportNavigateUp()
+    }
+
+
 
 }

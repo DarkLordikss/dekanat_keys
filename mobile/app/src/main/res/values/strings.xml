@@ -40,7 +40,8 @@
     <string name="title_profile">Профиль</string>
     <string name="title_dashboard">Расписание</string>
     <string name="title_my_application">Мои заявки</string>
-
+    <string name="title_user_fragments">Пользователи</string>
+    <string name="title_notification_fragments">Уведомления о заявках</string>
     <string name="title_create_application">Создать заявку</string>
 
 
