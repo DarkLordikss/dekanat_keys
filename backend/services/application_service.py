@@ -387,7 +387,11 @@ class ApplicationService:
     async def change_application_status(self, db: Session, application_id: str, user: User, new_status: int):
         try:
             app = await self.get_application_by_id(db, application_id)
-            applications = db.query(Application).filter(Application.application_group_id == app.application_group_id).all()
+
+            if new_status is ApplicationStatuses.Confirmed.value:
+                applications = db.query(Application).filter(Application.application_group_id == app.application_group_id).all()
+            else:
+                applications = [app]
 
             for application in applications:
                 if user.role_id != UserRoles.Dean_office_employee.value:
