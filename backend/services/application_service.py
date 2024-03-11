@@ -22,6 +22,7 @@ from models.tables.application import Application
 from models.tables.classroom import Classroom
 from models.tables.confirm_status import ConfirmStatus
 from models.tables.role import Role
+from models.tables.transfering_application import TransferingApplication
 from models.tables.user import User
 
 from datetime import datetime, timedelta, date
@@ -280,6 +281,33 @@ class ApplicationService:
             class_number=application[1].number
         )
         return application_dto
+
+    async def show_notifications(self, user_id: UUID, db: Session) -> list[ApplicationInfDTO]:
+        applications = db \
+            .query(Application, TransferingApplication, Classroom) \
+            .join(TransferingApplication, and_(TransferingApplication.user_recipient_id == user_id, Application.user_id == TransferingApplication.user_sender_id)) \
+            .join(Classroom, Classroom.id == Application.classroom_id) \
+            .all()
+
+        applications_dto = []
+        for application, transfering_application, classroom in applications:
+            application_dto = ApplicationInfDTO(
+                application_id=application.id,
+                classroom_id=application.classroom_id,
+                user_id=application.user_id,
+                status=application.application_status_id,
+                name=application.name,
+                description=application.description,
+                application_date=application.application_date.date(),
+                class_date=application.class_date,
+                time_table_id=application.time_table_id,
+                building=classroom.building,
+                class_number=classroom.number
+            )
+
+            applications_dto.append(application_dto)
+
+        return applications_dto
 
 
     @staticmethod

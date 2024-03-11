@@ -25,6 +25,7 @@ from models.tables.classroom import Classroom
 from models.tables.connected_user import ConnectedUser
 from models.tables.transfering_application import TransferingApplication
 from models.tables.user import User
+from services.websocket_service import WebsocketService
 from storage.db_config import get_db
 
 from services.classroom_service import ClassroomService
@@ -609,21 +610,10 @@ async def transfer_key(
             user_sender_id=user_sender.id
         )
         logger.info(f"2222222222222222222")
+        db.add(message_data)
+        db.commit()
         await manager.send_personal_message(json.dumps(message_data.__json__()), user_recipient_id)
-        if recipient:
-            logger.info(f"2222222222222222222")
-            for connection in manager.active_connections:
-                logger.info(f"1111111111111 {connection},        {connection.client_id}, {connection.user_id}")
-                if connection.user_id == user_recipient_id:  # Предположим, что у вас есть атрибут client_id для WebSocket
-                    await manager.send_personal_message(message_data.__json__(), connection)
-            #websocket = client_socket.websocket_id
-            #websocket = manager.send_personal_message(message_data.__json__(), user_recipient_id)
-            #websocket = client_sockets[user_recipient_id]
-            #message_json = json.dumps(message_data)
-            #await websocket.send_json(message_data.__json__())
-        else:
-            db.add(message_data)
-            db.commit()
+
 
     except jwt.PyJWTError as e:
         logger.warning(f"(Get users profiles) Bad token: {e}")
@@ -634,6 +624,99 @@ async def transfer_key(
     #     logger.error(f"(Application) Error: {e}")
     #     raise HTTPException(status_code=500, detail="Internal server error")
 
+
+@application_router.get(
+    "/get_notifications/",
+    tags=[config.SWAGGER_GROUPS["application"]],
+    response_model=list[ApplicationInfDTO],
+    responses={
+        200: {
+            "model": list[ApplicationInfDTO]
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def get_notifications(
+        access_token: str = Depends(config.oauth2_scheme),
+        db: Session = Depends(get_db),
+        user_service: UserService = Depends(UserService),
+        auth_service: AuthService = Depends(AuthService),
+        application_service: ApplicationService = Depends(ApplicationService),
+        classroom_service: ClassroomService = Depends(ClassroomService),
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
+):
+    try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Change deal status) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+
+        token_data = auth_service.get_data_from_access_token(access_token)
+        user = await user_service.get_user_by_id(db, (await token_data)["sub"])
+
+        notifications = await application_service.show_notifications(user.id, db)
+
+        return notifications
+
+    except jwt.PyJWTError as e:
+        logger.warning(f"(Get users profiles) Bad token: {e}")
+        raise HTTPException(status_code=403, detail="Bad token")
+    except HTTPException:
+        raise
+
+
+@application_router.post(
+    "/change_key_owner/",
+    tags=[config.SWAGGER_GROUPS["application"]],
+    responses={
+        200: {
+            "model": MessageDTO
+        },
+        404: {
+            "model": ErrorDTO
+        },
+        400: {
+            "model": ErrorDTO
+        },
+        500: {
+            "model": ErrorDTO
+        }
+    }
+)
+async def change_key_owner(
+        application_id: str,
+        user_sender_id: str,
+        answer: bool,
+        access_token: str = Depends(config.oauth2_scheme),
+        db: Session = Depends(get_db),
+        user_service: UserService = Depends(UserService),
+        auth_service: AuthService = Depends(AuthService),
+        application_service: ApplicationService = Depends(ApplicationService),
+        websocket_service: WebsocketService = Depends(WebsocketService),
+        classroom_service: ClassroomService = Depends(ClassroomService),
+        entity_verifier_service: EntityVerifierService = Depends(EntityVerifierService),
+):
+    try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Change deal status) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+
+        token_data = auth_service.get_data_from_access_token(access_token)
+        user = await user_service.get_user_by_id(db, (await token_data)["sub"])
+
+        await websocket_service.change_application_owner(db, user_sender_id, user.id, application_id, answer)
+    except jwt.PyJWTError as e:
+        logger.warning(f"(Get users profiles) Bad token: {e}")
+        raise HTTPException(status_code=403, detail="Bad token")
+    except HTTPException:
+        raise
 
 """
 @application_router.post("/send_notification/")

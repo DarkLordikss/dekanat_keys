@@ -21,6 +21,7 @@ notifications_websocket = FastAPI(prefix="/notifications")
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
+        self.sended_text: str
 
     async def connect(self, websocket: WebSocket, user_id: str):
         await websocket.accept()
@@ -31,6 +32,7 @@ class ConnectionManager:
 
     async def send_personal_message(self, message: str, user_id: str):
         websocket = self.active_connections.get(user_id)
+        self.sended_text = message
         if websocket:
             await websocket.send_text(message)
 
