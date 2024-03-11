@@ -25,6 +25,8 @@ class ApplicationInfDTO(BaseModel):
     application_date: date
     class_date: date
     time_table_id: int
+    building: int
+    class_number: int
 
 
 

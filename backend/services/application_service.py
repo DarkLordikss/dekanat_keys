@@ -264,18 +264,19 @@ class ApplicationService:
         return formatted_timetable
 
     async def show_concrete_application(self, application_id: UUID, db: Session) -> ApplicationInfDTO:
-        application = db.query(Application).filter(Application.id == application_id).first()
-        self.logger.info(application.application_date)
+        application = db.query(Application, Classroom).join(Classroom, Classroom.id == Application.classroom_id).filter(Application.id == application_id).first()
         application_dto = ApplicationInfDTO(
-            application_id=application.id,
-            classroom_id=application.classroom_id,
-            user_id=application.user_id,
-            status=application.application_status_id,
-            name=application.name,
-            description=application.description,
-            application_date=application.application_date.date(),
-            class_date=application.class_date,
-            time_table_id=application.time_table_id
+            application_id=application[0].id,
+            classroom_id=application[0].classroom_id,
+            user_id=application[0].user_id,
+            status=application[0].application_status_id,
+            name=application[0].name,
+            description=application[0].description,
+            application_date=application[0].application_date.date(),
+            class_date=application[0].class_date,
+            time_table_id=application[0].time_table_id,
+            building=application[1].building,
+            class_number=application[1].number
         )
         return application_dto
 
