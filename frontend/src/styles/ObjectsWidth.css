@@ -16,6 +16,9 @@
 .w70-obj {
     width: 70%;
 }
+.w70-small-obj {
+    width: 70%;
+}
 .w60-obj {
     width: 60%;
 }
@@ -32,6 +35,9 @@
     width: 33.3%;
 }
 .w30-obj {
+    width: 30%;
+}
+.w30-small-obj {
     width: 30%;
 }
 .w25-obj {
@@ -132,6 +138,9 @@
     .w80-small-obj {
         width: 100%;
     }
+    .w70-small-obj {
+        width: 100%;
+    }
     .w50-small-obj {
         width: 100%;
     }
@@ -142,6 +151,9 @@
         width: 100%;
     }
     .w30-obj {
+        width: 100%;
+    }
+    .w30-small-obj {
         width: 100%;
     }
     .w25-obj {

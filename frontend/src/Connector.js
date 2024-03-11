@@ -241,7 +241,7 @@ export async function getUsers(user, token) {
                 'Authorization': `Bearer ${token}`,
             },
         });
-        console.log(response)
+
         if (!response.ok) {
             if (response.status === 400) {
                 alert(`Произошла ошибка!\nСписок пуст"`)
@@ -273,5 +273,32 @@ export const updateRole = async (id, role, selectedValue) => {
 
     } catch (error) {
         console.error('Ошибка:', error);
+    }
+}
+
+export const getKeys = async () => {
+    try {
+        const response = await fetch(`${default_way}applications/track_keys/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        if (!response.ok) {
+            if (response.status === 400 || response.status === 404) {
+                alert(`Произошла неизвестная ошибка!"`)
+            }
+            else if (response.status === 403) {
+                window.location.href = '/'
+            }
+            else if (response.status === 500) {
+                alert('Произошла ошибка!\nОшибка на сервере!')
+            }
+            return null;
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error:', error.message);
     }
 }
