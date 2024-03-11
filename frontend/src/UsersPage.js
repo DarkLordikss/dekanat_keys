@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import UserItem from "./UserItem";
-import RoleSelector from "./RoleSelector";
 import {
     checkAuth,
     getUsers
@@ -40,12 +39,6 @@ class UsersPage extends React.Component {
         }
 
         console.log(this.state.users);
-
-
-        /*for (let i = 0; i < users.length; i++) {
-            let user = users[i];
-            this.state.users.push(user);
-        }*/
     }
 
     function
