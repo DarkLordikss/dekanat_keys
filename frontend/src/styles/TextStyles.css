@@ -14,6 +14,9 @@
 .text-default {
     color: var(--text-default-color);
 }
+.text-white {
+    color: rgb(255, 255, 255);
+}
 .text-blue {
     color: var(--button-default);
 }

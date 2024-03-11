@@ -1,6 +1,7 @@
 * {
     white-space: normal;
     scrollbar-width: none;
+    z-index: 0;
 }
 
 :root {
@@ -42,7 +43,7 @@ button {
     border-radius: 0;
 }
 
-input {
+input:not(#checkbox-1, #checkbox-2) {
     min-height: 40px;
     background-color: var(--back-color);
     border: 0;
@@ -129,6 +130,10 @@ select:active {
     max-width: 1000px;
     width: min-content;
 }
+.bigger-object {
+    min-width: 250px;
+    max-width: 2000px;
+}
 .smaller-object {
     min-width: 180px;
 }
@@ -158,6 +163,29 @@ select:active {
     border: 1px solid var(--borders-color);
     border-radius: 3px;
 }
+
+.box-border-r {
+    border-right: 1px solid var(--borders-color);
+    border-radius: 3px;
+}
+.box-border-l {
+    border-left: 1px solid var(--borders-color);
+    border-radius: 3px;
+}
+
+.no-radius {
+    border-radius: 0;
+}
+
+.radius-l {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+.radius-r {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
 
 .filling-box {
     width: 100%;

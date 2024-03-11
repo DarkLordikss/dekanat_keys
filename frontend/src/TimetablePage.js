@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './styles/Common.css';
 import './styles/ObjectsWidth.css';
 import './styles/SpacingStyles.css';
 import './styles/TextStyles.css';
 import './styles/ButtonsStyles.css';
-import { checkAuth, getTimetable, getRooms, getBuildings, getRoomsFromBuilding, changeApplicationStatus } from "./Connector.js";
+import { checkAuth, getTimetable, getBuildings, getRoomsFromBuilding, changeApplicationStatus } from "./Connector.js";
 import { getStatusString, parseDate, getBarriers, parseSmallDate, getStatusStyle} from "./Parsers.js";
 
 class TimetablePage extends React.Component {
@@ -58,13 +58,8 @@ class TimetablePage extends React.Component {
     for (let i = 0; i < rooms.length; i++) {
       let room = rooms[i];
       this.state.classRooms.push(room);
-      if (i == 0) {
-        this.state.choosenRooms.push(room);
-        document.getElementById('classrooms').innerHTML += `<div class="classroom-button raw-object nullable-object button-good auditory-object padding-h-big margin-h-r-small" id="${room.id}">${room.number}</div>`
-      }
-      else {
-        document.getElementById('classrooms').innerHTML += `<div class="classroom-button raw-object nullable-object button-inactive auditory-object padding-h-big margin-h-r-small" id="${room.id}">${room.number}</div>`
-      }
+      this.state.choosenRooms.push(room);
+      document.getElementById('classrooms').innerHTML += `<div class="classroom-button raw-object nullable-object button-good auditory-object padding-h-big margin-h-r-small" id="${room.id}">${room.number}</div>`
     }
 
     await this.generateSchedule();
@@ -286,8 +281,7 @@ class TimetablePage extends React.Component {
     document.getElementById(`chooseRoom_${nId}`).setAttribute('disabled','disabled');
     document.getElementById('classrooms').innerHTML += `<div class="classroom-button raw-object nullable-object button-good auditory-object padding-h-big" id="${nId}">${room.number}</div>`;
   }
-
-
+  
   render() {
     return (
       <div class="container content-center">
