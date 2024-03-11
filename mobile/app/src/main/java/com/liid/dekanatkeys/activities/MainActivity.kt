@@ -64,6 +64,11 @@ class MainActivity : AppCompatActivity() {
         ))
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        val controller = findNavController(R.id.nav_host_fragment_activity_main)
+        return controller.navigateUp() || super.onSupportNavigateUp()
+    }
+
 
 
 }
