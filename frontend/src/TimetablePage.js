@@ -95,6 +95,7 @@ class TimetablePage extends React.Component {
   }
 
   async setSchedule(schedule) {
+
     for (let i = 0; i < 7; i++) {
       const day = schedule[i];
       let curDate = await parseSmallDate(day.date);
@@ -103,14 +104,15 @@ class TimetablePage extends React.Component {
       for (let j = 1; j < 7; j++) {
         const time = timetable[j] ? timetable[j] : [];
         document.getElementById(`day_box_${i}_${j}`).innerHTML = "";
+        this.state.applicatios[i][j] = [];
         for (let k = 0; k < time.length; k++) {
           let pare = time[k];
           document.getElementById(`day_box_${i}_${j}`).innerHTML += 
-          `<div id="application_${i}_${j}_${pare.classroom_id}" class="application-box raw-object w100-obj nullable-object raw-box ${await getStatusStyle(pare.status)} margin-v-normal padding-h-normal padding-v-normal">
-            <div id="application_name_${i}_${j}_${pare.classroom_id}" class="application-box application-child raw-object w100-obj nullable-object text-big text-width-bold">${pare.name}</div>
-            <div id="application_auditory_${i}_${j}_${pare.classroom_id}" class="application-box application-child raw-object w100-obj nullable-object text-normal margin-v-b-normal">${pare.buildings} к., ${pare.class_number} ауд.</div>
-            <div id="application_status_${i}_${j}_${pare.classroom_id}" class="application-box application-child raw-object w100-obj nullable-object text-normal margin-v-b-normal">${await getStatusString(pare.status)}</div>
-            <div id="application_description_${i}_${j}_${pare.classroom_id}" class="application-box application-child raw-object w100-obj nullable-object text-small">Описание: ${pare.description}</div>
+          `<div id="application_${i}_${j}_${pare.application_id}" class="application-box raw-object w100-obj nullable-object raw-box ${await getStatusStyle(pare.status)} margin-v-normal padding-h-normal padding-v-normal">
+            <div id="application_name_${i}_${j}_${pare.application_id}" class="application-box application-child raw-object w100-obj nullable-object text-big text-width-bold">${pare.name}</div>
+            <div id="application_auditory_${i}_${j}_${pare.application_id}" class="application-box application-child raw-object w100-obj nullable-object text-normal margin-v-b-normal">${pare.buildings} к., ${pare.class_number} ауд.</div>
+            <div id="application_status_${i}_${j}_${pare.application_id}" class="application-box application-child raw-object w100-obj nullable-object text-normal margin-v-b-normal">${await getStatusString(pare.status)}</div>
+            <div id="application_description_${i}_${j}_${pare.application_id}" class="application-box application-child raw-object w100-obj nullable-object text-small">Описание: ${pare.description}</div>
           </div>`;
           this.state.applicatios[i][j].push(pare);
         }
@@ -185,12 +187,14 @@ class TimetablePage extends React.Component {
       for (let k = 0; k < this.state.applicatios[i][j].length; k++) {
         const application = this.state.applicatios[i][j][k];
         console.log(this.state.applicatios[i][j][k], pareId);
-        if (application.classroom_id == pareId) {
+        if (application.application_id == pareId) {
           pare = application;
           console.log(this.state.applicatios[this.state.choosen_day[0]][this.state.choosen_day[1]][k]);
           break;
         }
       }
+
+      console.log("mypare:", pare);
 
       document.getElementById('application_pare_name').innerText = pare.name;
       document.getElementById('application_pare_building').innerText = pare.buildings;
@@ -212,6 +216,9 @@ class TimetablePage extends React.Component {
     }
     else if (targetClasses.contains('black-content-window')) {
       document.getElementById('application_info').style.display = '';
+      for (let i = 1; i <= 6; i++) {
+        document.getElementById(`status_${i}`).setAttribute('disabled', 'disabled');
+      }
       // document.getElementById(`${}_save_status_changes`).setAttribute('id', 'save_status_changes');
     }
     else if (targetClasses.contains('save_status_changes') && targetClasses.contains('button-default')) {
@@ -235,7 +242,7 @@ class TimetablePage extends React.Component {
         
         for (let index = 0; index < this.state.applicatios[this.state.choosen_day[0]][this.state.choosen_day[1]].length; index++) {
           let applic = this.state.applicatios[this.state.choosen_day[0]][this.state.choosen_day[1]][index];
-          if (applic.classroom_id == this.state.choosenApplicationId) {
+          if (applic.application_id == this.state.choosenApplicationId) {
             applic.status = parseInt(document.getElementById('special_status').value);
             this.state.applicatios[this.state.choosen_day[0]][this.state.choosen_day[1]][index] = applic;
             break;
@@ -476,9 +483,8 @@ class TimetablePage extends React.Component {
                   </div>
                 </div>
               </div>
-          </div>
-          
-            
+            </div>
+
           </div>
         </div>
         <div id="application_info" class="middle-wall-object black-content-window">
@@ -510,7 +516,7 @@ class TimetablePage extends React.Component {
                 </select>
               </div>
               <div class="raw-object w100-obj nullable-object text-normal">
-                <div class="raw-object nullable-object text-normal text-width-bold margin-h-r-normal">
+                <div class="raw-object nullable-object text-normal text-width-bold margin-h-r-normal vertical-top">
                   Описание:
                 </div><div id="application_pare_description" class="raw-object nullable-object text-normal text-width-normal">
                 </div>

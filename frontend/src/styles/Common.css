@@ -23,7 +23,7 @@
 
     --button-wrong : rgb(255, 51, 51);
     --button-wrong-a : rgb(255, 82, 82);
-    --button-wrong-h : rgb(156, 30, 30);
+    --button-wrong-h : rgb(140, 28, 28);
 
     --button-good : rgb(82, 219, 153);
     --button-good-a : rgb(108, 231, 171);
@@ -153,6 +153,9 @@ select:active {
 .checkbox {
     min-height: 20px;
     min-width: 20px;
+}
+.table-cell {
+    min-height: 40px;
 }
 
 .raw-box {

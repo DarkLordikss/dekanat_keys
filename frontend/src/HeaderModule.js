@@ -29,6 +29,8 @@ class HeaderModule extends React.Component {
                     Расписание
                 </div><div id="/users" class='raw-object nullable-object navigation-bar content-center vertical-middle text-big text-width-bold text-white padding-v-b-small margin-h-normal'>
                     Пользователи
+                </div><div id="/keys" class='raw-object nullable-object navigation-bar content-center vertical-middle text-big text-width-bold text-white padding-v-b-small margin-h-normal'>
+                    Ключи
                 </div>
             </div>
         </div>
