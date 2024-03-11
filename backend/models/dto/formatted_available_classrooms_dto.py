@@ -14,6 +14,7 @@ class ClassroomForPair(BaseModel):
 class ClassroomForPairWithTrack(BaseModel):
     classroom_id: UUID
     buildings: int
+    name: str = None
     class_number: int
     user_id: Optional[UUID] = None
 
