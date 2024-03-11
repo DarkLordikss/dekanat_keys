@@ -15,18 +15,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.liid.dekanatkeys.R
 import com.liid.dekanatkeys.activities.LoginActivity
-import com.liid.dekanatkeys.activities.SuccessRegistrationActivity
 import com.liid.dekanatkeys.activities.ui.dashboard.DashboardViewModel
-import com.liid.dekanatkeys.databinding.FragmentChooseBuildingBinding
 import com.liid.dekanatkeys.databinding.FragmentCreateApplicationBinding
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
 import com.liid.dekanatkeys.helpers.OKOCallback
-import com.liid.dekanatkeys.models.BuildingsResponse
 import com.liid.dekanatkeys.models.CreateApplicationRequest
-import com.liid.dekanatkeys.models.CreateApplicationResponse
-import com.liid.dekanatkeys.models.user.UserProfile
-import retrofit2.Call
+import com.liid.dekanatkeys.models.MessageResponse
 
 
 class CreateApplicationFragment : Fragment() {
@@ -140,7 +135,7 @@ class CreateApplicationFragment : Fragment() {
         val token = preferences.getString(getString(R.string.jwtTokenName), null)
         Log(token.toString())
 
-        OKOApiSingleton.api.createApplication(response, "bearer $token").enqueue(OKOCallback<CreateApplicationResponse>(
+        OKOApiSingleton.api.createApplication(response, "bearer $token").enqueue(OKOCallback<MessageResponse>(
             successCallback = {response ->
                 Log(response.body()!!.message)
                 findNavController().navigate(R.id.action_createApplicationFragment_to_navigation_my_application)

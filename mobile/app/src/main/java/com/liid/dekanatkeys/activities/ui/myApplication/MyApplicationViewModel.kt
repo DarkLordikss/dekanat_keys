@@ -7,5 +7,5 @@ import androidx.lifecycle.ViewModel
 class MyApplicationViewModel : ViewModel() {
 
     var applicationId:String? = null
-    var name:String? = null
+    var userId:String? = null
 }

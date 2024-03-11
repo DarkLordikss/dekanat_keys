@@ -7,7 +7,7 @@ import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.models.user.UserInfo
 
 
-class UsersRecyclerAdapter(private val users: List<UserInfo>, parentFragment: UsersFragment) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class UsersRecyclerAdapter(private val users: List<UserInfo>, private val parentFragment: UsersFragment) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class UsersRecyclerHolder(var itemView: UserInfoItem) : RecyclerView.ViewHolder(itemView){
 
@@ -26,7 +26,9 @@ class UsersRecyclerAdapter(private val users: List<UserInfo>, parentFragment: Us
         val user = users[position]
         item.setUserInfo(user.email, user.name, user.id)
         item.setOnClickListener {
-            Log((it as UserInfoItem).userId)
+            parentFragment.myApplicationViewModel.userId = (it as UserInfoItem).userId
+            Log(parentFragment.myApplicationViewModel.userId.toString())
+            parentFragment.transfer()
         }
     }
 }

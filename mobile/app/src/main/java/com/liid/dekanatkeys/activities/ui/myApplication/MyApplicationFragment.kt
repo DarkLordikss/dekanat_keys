@@ -61,7 +61,7 @@ class MyApplicationFragment : Fragment() {
                 successCallback = {response ->
                     if (response.body() != null){
                         val applications = ApplicationWithDateStatus.getFromTimetableWithDates(response.body()!!.TimetableWithDates)
-                        myApplicationRecyclerView.adapter =ApplicationRecicleAdapter(applications, this)
+                        myApplicationRecyclerView.adapter = ApplicationRecicleAdapter(applications, this)
 //
                     }
                 },

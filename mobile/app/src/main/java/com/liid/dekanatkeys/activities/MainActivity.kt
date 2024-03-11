@@ -1,6 +1,7 @@
 package com.liid.dekanatkeys.activities
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,7 @@ import com.liid.dekanatkeys.databinding.ActivityMainBinding
 import com.liid.dekanatkeys.helpers.Log
 import com.liid.dekanatkeys.helpers.OKOApiSingleton
 import com.liid.dekanatkeys.helpers.OKOCallback
+import com.liid.dekanatkeys.helpers.WebSocketSingleton
 import com.liid.dekanatkeys.models.TransferKeySocketMessage
 import com.liid.dekanatkeys.models.user.UserProfile
 import okhttp3.OkHttpClient
@@ -29,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var socketClient: OkHttpClient
     private lateinit var socketRequest: Request
     private lateinit var webSocket:WebSocket
+    private lateinit var preferences: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,16 +49,12 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         socketClient = OkHttpClient.Builder().build()
-
-//        webSocket.send("applicationId:usersenderId:True")
-//        webSocket.send("applicationId:usersenderId:True")
+        preferences = getSharedPreferences(getString(R.string.SP_name), MODE_PRIVATE)
 
         getUserProfile()
     }
     private fun getUserProfile() {
-        val preferences = getSharedPreferences(getString(R.string.SP_name), MODE_PRIVATE)
         val token = preferences.getString(getString(R.string.jwtTokenName), null)
-        Log(if (token != null) "get$ token" else "token not found")
         OKOApiSingleton.api.fetchUserProfile("bearer $token").enqueue(OKOCallback<UserProfile>(
             successCallback = {response ->
                 val userProfile = response.body()
@@ -66,7 +65,6 @@ class MainActivity : AppCompatActivity() {
                     editor.putString(getString(R.string.userId), userProfile.id)
                     editor.putString("name", userProfile.name)
                     editor.putString("email", userProfile.email)
-
                     editor.apply()
 
                     createWebSocket(userProfile.id)
@@ -80,8 +78,6 @@ class MainActivity : AppCompatActivity() {
         ))
     }
 
-
-
     private fun createWebSocket(userId: String){
         socketRequest = Request.Builder().url("ws://89.23.106.97:3223/notifications/ws/${userId}").build()
         webSocket = socketClient.newWebSocket(socketRequest, object : WebSocketListener(){
@@ -94,8 +90,29 @@ class MainActivity : AppCompatActivity() {
                 super.onMessage(webSocket, text)
                 Log("onMessage")
                 Log(text)
-                val transferKeySocketMessage = Gson().fromJson(text, TransferKeySocketMessage::class.java)
-                webSocket.send("${transferKeySocketMessage.application_id}:${transferKeySocketMessage.user_sender_id}:True")
+
+                val exitingMessages = preferences.getString(getString(R.string.transfer_key_socket_message), null)
+//                exitingMessages = null
+                val editor = preferences.edit()
+
+                if (exitingMessages == null){
+                    editor.putString(getString(R.string.transfer_key_socket_message), text)
+                    editor.apply()
+                }
+                else{
+                    val keyMessagesSplitText = exitingMessages.split('#')
+                    var alredyExiting = false
+                    for (k in keyMessagesSplitText){
+                        if (k == text) alredyExiting = true
+                    }
+                    if (!alredyExiting)
+                    {
+                        editor.putString(getString(R.string.transfer_key_socket_message),"$exitingMessages#$text")
+                        editor.apply()
+                    }
+                }
+
+//                send()
             }
 
             override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
@@ -112,6 +129,15 @@ class MainActivity : AppCompatActivity() {
                 Log("onFailure")
             }
         })
+
+        WebSocketSingleton.initialize(webSocket)
+    }
+
+    private fun send(){
+        val text = preferences.getString(getString(R.string.transfer_key_socket_message), null)
+        val transferKeySocketMessage = Gson().fromJson(text, TransferKeySocketMessage::class.java)
+        Log("${transferKeySocketMessage.application_id}:${transferKeySocketMessage.user_sender_id}:True")
+        WebSocketSingleton.socket.send("${transferKeySocketMessage.application_id}:${transferKeySocketMessage.user_sender_id}:True")
     }
 
     override fun onSupportNavigateUp(): Boolean {

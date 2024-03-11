@@ -36,7 +36,7 @@ interface ApiService {
                           @Query("statuses") statuses: List<Int>,
                           @Query("classrooms") classrooms: List<Int>): Call<ApplicationsResponse>
     @POST("applications/create/")
-    fun createApplication(@Body request: CreateApplicationRequest, @Header("Authorization") token: String): Call<CreateApplicationResponse>
+    fun createApplication(@Body request: CreateApplicationRequest, @Header("Authorization") token: String): Call<MessageResponse>
 
     @GET("user/users/")
     fun fetchUsers(@Query("roles") roles: List<Int>, @Header("Authorization") token: String): Call<List<UserInfo>>
@@ -46,5 +46,13 @@ interface ApiService {
                           @Query("end_date") end_date : LocalDate,
                           @Query("statuses") statuses: List<Int>,
                             @Header("Authorization") token: String): Call<ApplicationsResponse>
+
+    @POST("applications/transfer_key/")
+    fun transferKey(@Query("application_id") application_id : String,
+                    @Query("user_recipient_id") user_recipient_id : String,
+                    @Header("Authorization") token: String): Call<MessageResponse>
+
+    @GET("applications/show_concrete_application/")
+    fun getApplication(@Query("application_id") application_id : String):Call<ApplicationWithDateStatus>
 
 }

@@ -31,14 +31,16 @@ class TimetableWithList(timetable: Timetable){
         timetable.application7?.get(0),
     )
 }
-class ApplicationWithDateStatus(val id: UUID,
-                                val name: String,
-                                val description: String,
-                                val building: Int,
-                                val classNumber: Int,
-                                val date: String,
-                                val status: Int,
-                                val lessonNumber: Int){
+class ApplicationWithDateStatus(
+    @SerializedName("application_id") val application_id: String,
+    @SerializedName("classroom_id") val classroom_id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("buildings") val building: Int,
+    @SerializedName("class_number") val classNumber: Int,
+    @SerializedName("class_date")val date: String,
+    @SerializedName("status") val status: Int,
+    @SerializedName("time_table_id")val lessonNumber: Int){
 
     companion object{
         fun getFromTimetableWithDates(TimetableWithDates: List<TimetableWithDate>) : List<ApplicationWithDateStatus>{
@@ -58,7 +60,9 @@ class ApplicationWithDateStatus(val id: UUID,
 
                 for (i in applications.indices){
                     if(applications[i] != null){
-                        out.add(ApplicationWithDateStatus(applications[i]!!.id,
+                        out.add(ApplicationWithDateStatus(
+                            applications[i]!!.application_id,
+                            applications[i]!!.classroom_id,
                             applications[i]!!.name,
                             applications[i]!!.description,
                             applications[i]!!.building,
@@ -81,7 +85,8 @@ class TimetableWithDate(@SerializedName("timetable") val timetable: Timetable,
 }
 
 
-class Application(@SerializedName("classroom_id") val id: UUID,
+class Application(@SerializedName("application_id") val application_id: String,
+                  @SerializedName("classroom_id") val classroom_id: String,
                   @SerializedName("name") val name: String,
                   @SerializedName("description") val description: String,
                   @SerializedName("buildings") val building: Int,
